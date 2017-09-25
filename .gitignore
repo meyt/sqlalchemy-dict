@@ -2,3 +2,4 @@
 .idea/
 dist/
 sqlalchemy_dict.egg-info/
+__pycache__/
