@@ -19,6 +19,8 @@ class UtilsTestCase(unittest.TestCase):
         result = format_iso_time(time(12, 52, 29, 300, tzinfo=timezone(timedelta(minutes=0))))
         self.assertEqual(result, '12:52:29Z')
 
+        result = format_iso_time(time(12, 52, 29, 300))
+        self.assertEqual(result, '12:52:29')
 
 if __name__ == '__main__':  # pragma: no cover
     unittest.main()
