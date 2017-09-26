@@ -59,7 +59,7 @@ class Member(DeclarativeBase):
     birth = Field(Date)
     breakfast_time = Field(Time, nullable=True)
     weight = Field(Float(asdecimal=True), default=50)
-    _keywords = relationship('Keyword', secondary='member_keywords')
+    _keywords = relationship('Keyword', secondary='member_keywords', dict_key='keywords')
     keywords = association_proxy('_keywords', 'keyword', creator=lambda k: Keyword(keyword=k))
     visible = Field(Boolean, nullable=True)
     last_login_time = Field(DateTime)
