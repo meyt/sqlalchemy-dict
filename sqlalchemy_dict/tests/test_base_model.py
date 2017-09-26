@@ -53,7 +53,7 @@ class Member(DeclarativeBase):
     first_name = Field(Unicode(50), index=True)
     last_name = Field(Unicode(100))
     phone = Field(Unicode(10), nullable=True)
-    name = composite(FullName, first_name, last_name, readonly=True, dictKey='fullName')
+    name = composite(FullName, first_name, last_name, readonly=True, dict_key='fullName')
     _password = Field('password', Unicode(128), index=True, protected=True)
     birth = Field(Date)
     breakfast_time = Field(Time, nullable=True)
