@@ -135,6 +135,26 @@ class BaseModelTestCase(unittest.TestCase):
         self.assertEqual(member.visible, False)
         self.assertEqual(member.weight, 1.1)
         self.assertEqual(member.meta, self.member_dict_sample['meta'])
+        self.session.add(member)
+
+        @Member.expose
+        def testing_expose(title=None):
+            query = self.session.query(Member)
+            if title:
+                return query.filter_by(title=title).one_or_none()
+            return query
+
+        # Query output
+        result = testing_expose()
+        self.assertEqual(result[0]['title'], self.member_dict_sample['title'])
+
+        # One object output
+        result = testing_expose(title=self.member_dict_sample['title'])
+        self.assertEqual(result['title'], self.member_dict_sample['title'])
+
+        # None
+        result = testing_expose(title='What?')
+        self.assertEqual(result, None)
 
     def test_get_column(self):
         title_column = Member.get_column('title')
