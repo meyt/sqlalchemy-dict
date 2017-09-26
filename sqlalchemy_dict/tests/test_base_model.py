@@ -61,6 +61,7 @@ class Member(DeclarativeBase):
     breakfast_time = Field(Time, nullable=True)
     weight = Field(Float(asdecimal=True), default=50)
     _keywords = relationship('Keyword', secondary='member_keywords', dict_key='keywords', protected=True)
+    _keywords_not_protected = relationship('Keyword', secondary='member_keywords')
     keywords = association_proxy('_keywords', 'keyword', creator=lambda k: Keyword(keyword=k))
     visible = Field(Boolean, nullable=True)
     last_login_time = Field(DateTime)
@@ -108,6 +109,15 @@ class BaseModelTestCase(unittest.TestCase):
         title_column = Member.get_column('title')
         self.assertIsInstance(title_column, Field)
 
+    def test_relationship(self):
+        member = Member()
+        member.keywords.append('keyword_one')
+        member.update_from_dict(self.member_dict_sample)
+        self.session.add(member)
+        self.session.commit()
+        result_dict = member.to_dict()
+        self.assertEqual(len(result_dict['KeywordsNotProtected']), 1)
+
     def test_iter_columns(self):
         columns = {c.key: c for c in Member.iter_columns(relationships=False, synonyms=False, composites=False)}
         self.assertEqual(len(columns), 13)
@@ -118,7 +128,7 @@ class BaseModelTestCase(unittest.TestCase):
     def test_iter_dict_columns(self):
         columns = {c.key: c for c in Member.iter_dict_columns(
             include_readonly_columns=False, include_protected_columns=False)}
-        self.assertEqual(len(columns), 11)
+        self.assertEqual(len(columns), 12)
         self.assertNotIn('name', columns)
         self.assertNotIn('password', columns)
         self.assertNotIn('_password', columns)
