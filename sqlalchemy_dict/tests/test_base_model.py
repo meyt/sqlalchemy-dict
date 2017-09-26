@@ -55,6 +55,7 @@ class Member(DeclarativeBase):
     is_active = Field(Boolean, nullable=True, readonly=True)
     phone = Field(Unicode(10), nullable=True)
     name = composite(FullName, first_name, last_name, readonly=True, dict_key='fullName')
+    name_alternative = composite(FullName, first_name, last_name, protected=True)
     _password = Field('password', Unicode(128), index=True, protected=True)
     birth = Field(Date)
     breakfast_time = Field(Time, nullable=True)
