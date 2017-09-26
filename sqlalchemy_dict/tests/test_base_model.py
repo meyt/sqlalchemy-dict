@@ -52,6 +52,7 @@ class Member(DeclarativeBase):
     title = Field(Unicode(50), index=True)
     first_name = Field(Unicode(50), index=True)
     last_name = Field(Unicode(100), dict_key='lastName')
+    is_active = Field(Boolean, nullable=True, readonly=True)
     phone = Field(Unicode(10), nullable=True)
     name = composite(FullName, first_name, last_name, readonly=True, dict_key='fullName')
     _password = Field('password', Unicode(128), index=True, protected=True)
@@ -103,7 +104,7 @@ class BaseModelTestCase(unittest.TestCase):
 
     def test_iter_columns(self):
         columns = {c.key: c for c in Member.iter_columns(relationships=False, synonyms=False, composites=False)}
-        self.assertEqual(len(columns), 12)
+        self.assertEqual(len(columns), 13)
         self.assertNotIn('name', columns)
         self.assertNotIn('password', columns)
         self.assertIn('_password', columns)
