@@ -224,7 +224,7 @@ class BaseModelTestCase(unittest.TestCase):
         member_result_dict = member.to_dict()
         self.assertEqual(member_result_dict['breakfastTime'], '08:08:08')
 
-        # none iso date format
+        # none iso time format
         with self.assertRaises(ValueError):
             member = Member()
             member_dict = dict(self.member_dict_sample)
