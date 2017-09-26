@@ -1,6 +1,6 @@
 import unittest
 
-from sqlalchemy import Unicode, Integer, Date, Time, Float, ForeignKey, Boolean, DateTime, create_engine
+from sqlalchemy import Unicode, Integer, Date, Time, Float, ForeignKey, Boolean, DateTime, create_engine, Enum
 from sqlalchemy.orm import synonym, Session
 from sqlalchemy.sql.schema import MetaData
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -65,6 +65,7 @@ class Member(DeclarativeBase):
     keywords = association_proxy('_keywords', 'keyword', creator=lambda k: Keyword(keyword=k))
     visible = Field(Boolean, nullable=True)
     last_login_time = Field(DateTime)
+    role = Field(Enum('admin', 'manager', 'normal', name='member_role_name'))
 
     def _set_password(self, password):
         self._password = 'hashed:%s' % password
@@ -85,7 +86,8 @@ class BaseModelTestCase(unittest.TestCase):
         'birth': '2001-01-01',
         'weight': 1.1,
         'visible': 'false',
-        'lastLoginTime': '2017-10-10T10:10:00.12313'
+        'lastLoginTime': '2017-10-10T10:10:00.12313',
+        'role': 'admin'
     }
 
     def setUp(self):
@@ -120,7 +122,7 @@ class BaseModelTestCase(unittest.TestCase):
 
     def test_iter_columns(self):
         columns = {c.key: c for c in Member.iter_columns(relationships=False, synonyms=False, composites=False)}
-        self.assertEqual(len(columns), 13)
+        self.assertEqual(len(columns), 14)
         self.assertNotIn('name', columns)
         self.assertNotIn('password', columns)
         self.assertIn('_password', columns)
@@ -128,7 +130,7 @@ class BaseModelTestCase(unittest.TestCase):
     def test_iter_dict_columns(self):
         columns = {c.key: c for c in Member.iter_dict_columns(
             include_readonly_columns=False, include_protected_columns=False)}
-        self.assertEqual(len(columns), 12)
+        self.assertEqual(len(columns), 13)
         self.assertNotIn('name', columns)
         self.assertNotIn('password', columns)
         self.assertNotIn('_password', columns)
