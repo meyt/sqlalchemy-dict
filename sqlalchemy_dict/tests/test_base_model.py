@@ -127,17 +127,6 @@ class BaseModelTestCase(unittest.TestCase):
         member = Member()
         member_dict = dict(self.member_dict_sample)
         member_dict.update({
-            'email': 'test2@example.com',
-            'birth': '2001-01-01',
-            'lastLoginTime': '2017-10-10T10:10:00.12313'
-        })
-        member.update_from_dict(member_dict)
-
-        member = Member()
-        member_dict = dict(self.member_dict_sample)
-        member_dict.update({
-            'email': 'test3@example.com',
-            'birth': '2001-01-01',
             'lastLoginTime': '2017-10-10T10:10:00.'
         })
         member.update_from_dict(member_dict)
@@ -145,8 +134,6 @@ class BaseModelTestCase(unittest.TestCase):
         member = Member()
         member_dict = dict(self.member_dict_sample)
         member_dict.update({
-            'email': 'test4@example.com',
-            'birth': '2001-01-01',
             'lastLoginTime': '2017-10-10T10:10:00'
         })
         member.update_from_dict(member_dict)
