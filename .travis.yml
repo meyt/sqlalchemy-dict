@@ -8,3 +8,5 @@ before_install:
 - pip install -r requirements-dev.txt
 install: pip install -e .
 script: coverage run --source sqlalchemy_dict $(which nosetests)
+after_success: if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then travis_retry coveralls
+  ; fi
