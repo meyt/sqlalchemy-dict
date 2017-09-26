@@ -8,31 +8,31 @@ class Formatter:
 
     @classmethod
     def export_key(cls, key):
-        raise NotImplemented
+        raise NotImplemented  # pragma: no cover
 
     @classmethod
     def export_datetime(cls, value):
-        raise NotImplemented
+        raise NotImplemented  # pragma: no cover
 
     @classmethod
     def export_date(cls, value):
-        raise NotImplemented
+        raise NotImplemented  # pragma: no cover
 
     @classmethod
     def export_time(cls, value):
-        raise NotImplemented
+        raise NotImplemented  # pragma: no cover
 
     @classmethod
     def import_datetime(cls, value):
-        raise NotImplemented
+        raise NotImplemented  # pragma: no cover
 
     @classmethod
     def import_date(cls, value):
-        raise NotImplemented
+        raise NotImplemented  # pragma: no cover
 
     @classmethod
     def import_time(cls, value):
-        raise NotImplemented
+        raise NotImplemented  # pragma: no cover
 
 
 class DefaultFormatter(Formatter):
