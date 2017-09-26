@@ -16,10 +16,17 @@ setup(
     name=package_name,
     version=package_version,
     author='Mahdi Ghane.g',
-    description='sqlalchemy extension for interact models with python dictionary.',
+    description='sqlalchemy extension for interacting models with python dictionary.',
     long_description=open('README.rst').read(),
     url='https://github.com/meyt/sqlalchemy-dict',
     packages=find_packages(),
     install_requires=dependencies,
-    license='MIT License'
+    license='MIT License',
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 3.5',
+        'Operating System :: OS Independent',
+        'Topic :: Software Development :: Libraries',
+    ]
 )
