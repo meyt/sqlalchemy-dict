@@ -143,8 +143,10 @@ class BaseModel(object):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             result = func(*args, **kwargs)
-            if result is None:
-                raise ValueError('No result')
+
+            if hasattr(result, 'to_dict'):
+                return result.to_dict()
+
             if isinstance(result, Query):
                 return cls.dump_query(result)
             return result
