@@ -51,7 +51,7 @@ class Member(DeclarativeBase):
     email = Field(Unicode(100), unique=True, index=True)
     title = Field(Unicode(50), index=True)
     first_name = Field(Unicode(50), index=True)
-    last_name = Field(Unicode(100))
+    last_name = Field(Unicode(100), dict_key='lastName')
     phone = Field(Unicode(10), nullable=True)
     name = composite(FullName, first_name, last_name, readonly=True, dict_key='fullName')
     _password = Field('password', Unicode(128), index=True, protected=True)
