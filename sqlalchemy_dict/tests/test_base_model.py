@@ -1,6 +1,6 @@
 import unittest
 
-from sqlalchemy import Unicode, Integer, Date, Time, Float, ForeignKey, Boolean, DateTime, create_engine
+from sqlalchemy import Unicode, Integer, Date, Time, Float, ForeignKey, Boolean, DateTime, create_engine, Table
 from sqlalchemy.orm import synonym, Session
 from sqlalchemy.sql.schema import MetaData
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -102,6 +102,10 @@ class BaseModelTestCase(unittest.TestCase):
         self.assertEqual(member.password, 'hashed:%s' % self.member_dict_sample['password'])
         self.assertEqual(member.visible, False)
         self.assertEqual(member.weight, 1.1)
+
+    def test_get_column(self):
+        title_column = Member.get_column('title')
+        self.assertIsInstance(title_column, Field)
 
     def test_iter_columns(self):
         columns = {c.key: c for c in Member.iter_columns(relationships=False, synonyms=False, composites=False)}
