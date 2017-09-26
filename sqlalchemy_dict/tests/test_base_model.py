@@ -1,6 +1,6 @@
 import unittest
 
-from sqlalchemy import Unicode, Integer, Date, Float, ForeignKey, Boolean, DateTime, create_engine
+from sqlalchemy import Unicode, Integer, Date, Time, Float, ForeignKey, Boolean, DateTime, create_engine
 from sqlalchemy.orm import synonym, Session
 from sqlalchemy.sql.schema import MetaData
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -56,6 +56,7 @@ class Member(DeclarativeBase):
     name = composite(FullName, first_name, last_name, readonly=True, dictKey='fullName')
     _password = Field('password', Unicode(128), index=True, protected=True)
     birth = Field(Date)
+    breakfast_time = Field(Time, nullable=True)
     weight = Field(Float(asdecimal=True), default=50)
     _keywords = relationship('Keyword', secondary='member_keywords')
     keywords = association_proxy('_keywords', 'keyword', creator=lambda k: Keyword(keyword=k))
@@ -102,7 +103,7 @@ class BaseModelTestCase(unittest.TestCase):
 
     def test_iter_columns(self):
         columns = {c.key: c for c in Member.iter_columns(relationships=False, synonyms=False, composites=False)}
-        self.assertEqual(len(columns), 11)
+        self.assertEqual(len(columns), 12)
         self.assertNotIn('name', columns)
         self.assertNotIn('password', columns)
         self.assertIn('_password', columns)
@@ -110,7 +111,7 @@ class BaseModelTestCase(unittest.TestCase):
     def test_iter_dict_columns(self):
         columns = {c.key: c for c in Member.iter_dict_columns(
             include_readonly_columns=False, include_protected_columns=False)}
-        self.assertEqual(len(columns), 11)
+        self.assertEqual(len(columns), 12)
         self.assertNotIn('name', columns)
         self.assertNotIn('password', columns)
         self.assertNotIn('_password', columns)
@@ -210,6 +211,25 @@ class BaseModelTestCase(unittest.TestCase):
             })
             member.update_from_dict(member_dict)
 
+    def test_time_format(self):
+        # iso time format
+        member = Member()
+        member_dict = dict(self.member_dict_sample)
+        member_dict.update({
+            'breakfastTime': '08:08:08',
+        })
+        member.update_from_dict(member_dict)
+        member_result_dict = member.to_dict()
+        self.assertEqual(member_result_dict['breakfastTime'], '08:08:08')
+
+        # none iso date format
+        with self.assertRaises(ValueError):
+            member = Member()
+            member_dict = dict(self.member_dict_sample)
+            member_dict.update({
+                'breakfastTime': '08-08-08'
+            })
+            member.update_from_dict(member_dict)
 
 if __name__ == '__main__':  # pragma: no cover
     unittest.main()

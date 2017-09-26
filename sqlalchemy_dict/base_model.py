@@ -125,6 +125,9 @@ class BaseModel(object):
                 elif c.type.python_type == date:
                     yield c, cls.__formatter__.import_date(value)
 
+                elif c.type.python_type == time:
+                    yield c, cls.__formatter__.import_time(value)
+
                 else:
                     yield c, value
 

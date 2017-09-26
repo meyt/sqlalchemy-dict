@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from sqlalchemy_dict.utils import format_iso_datetime, format_iso_time, to_camel_case
-from sqlalchemy_dict.constants import ISO_DATETIME_FORMAT, ISO_DATE_FORMAT, ISO_DATETIME_PATTERN
+from sqlalchemy_dict.constants import ISO_DATETIME_FORMAT, ISO_DATE_FORMAT, ISO_DATETIME_PATTERN, ISO_TIME_FORMAT
 
 
 class Formatter:
@@ -73,4 +73,7 @@ class DefaultFormatter(Formatter):
 
     @classmethod
     def import_time(cls, value):
-        pass
+        try:
+            return datetime.strptime(value, ISO_TIME_FORMAT).time()
+        except ValueError:
+            raise ValueError('Invalid date format')
