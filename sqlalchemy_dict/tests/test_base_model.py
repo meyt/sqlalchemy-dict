@@ -1,6 +1,6 @@
 import unittest
 
-from sqlalchemy import Unicode, Integer, Date, Time, Float, ForeignKey, Boolean, DateTime, create_engine, Table
+from sqlalchemy import Unicode, Integer, Date, Time, Float, ForeignKey, Boolean, DateTime, create_engine
 from sqlalchemy.orm import synonym, Session
 from sqlalchemy.sql.schema import MetaData
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -83,7 +83,8 @@ class BaseModelTestCase(unittest.TestCase):
         'password': '123456',
         'birth': '2001-01-01',
         'weight': 1.1,
-        'visible': 'false'
+        'visible': 'false',
+        'lastLoginTime': '2017-10-10T10:10:00.12313'
     }
 
     def setUp(self):
