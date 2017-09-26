@@ -59,7 +59,7 @@ class Member(DeclarativeBase):
     birth = Field(Date)
     breakfast_time = Field(Time, nullable=True)
     weight = Field(Float(asdecimal=True), default=50)
-    _keywords = relationship('Keyword', secondary='member_keywords', dict_key='keywords')
+    _keywords = relationship('Keyword', secondary='member_keywords', dict_key='keywords', protected=True)
     keywords = association_proxy('_keywords', 'keyword', creator=lambda k: Keyword(keyword=k))
     visible = Field(Boolean, nullable=True)
     last_login_time = Field(DateTime)
@@ -112,7 +112,7 @@ class BaseModelTestCase(unittest.TestCase):
     def test_iter_dict_columns(self):
         columns = {c.key: c for c in Member.iter_dict_columns(
             include_readonly_columns=False, include_protected_columns=False)}
-        self.assertEqual(len(columns), 12)
+        self.assertEqual(len(columns), 11)
         self.assertNotIn('name', columns)
         self.assertNotIn('password', columns)
         self.assertNotIn('_password', columns)
