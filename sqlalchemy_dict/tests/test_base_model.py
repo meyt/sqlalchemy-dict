@@ -176,6 +176,9 @@ class BaseModelTestCase(unittest.TestCase):
         result_dict = member.to_dict()
         self.assertEqual(len(result_dict['KeywordsNotProtected']), 1)
 
+        self.session.query(Member).delete()
+        self.session.commit()
+
     def test_iter_columns(self):
         columns = {c.key: c for c in Member.iter_columns(relationships=False, synonyms=False, composites=False)}
         self.assertEqual(len(columns), 16)
