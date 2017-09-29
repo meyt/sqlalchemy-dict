@@ -44,7 +44,7 @@ class FullName(object):  # pragma: no cover
         return '%s %s' % (self.first_name, self.last_name)
 
     def __repr__(self):
-        return "FullName(%s %s)" % (self.first_name, self.last_name)
+        return 'FullName(%s %s)' % (self.first_name, self.last_name)
 
     def __eq__(self, other):
         return isinstance(other, FullName) and \
@@ -63,8 +63,8 @@ class Keyword(DeclarativeBase):
 
 class MemberKeywords(DeclarativeBase):
     __tablename__ = 'member_keywords'
-    member_id = Field(Integer, ForeignKey("member.id"), primary_key=True)
-    keyword_id = Field(Integer, ForeignKey("keyword.id"), primary_key=True)
+    member_id = Field(Integer, ForeignKey('member.id'), primary_key=True)
+    keyword_id = Field(Integer, ForeignKey('keyword.id'), primary_key=True)
 
 
 class Member(DeclarativeBase):
