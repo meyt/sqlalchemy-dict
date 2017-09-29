@@ -90,6 +90,8 @@ class Member(DeclarativeBase):
     last_login_time = Field(DateTime)
     role = Field(Enum('admin', 'manager', 'normal', name='member_role_name'))
     meta = Field(JsonType)
+    assigner_id = Field(Integer, ForeignKey('member.id'), nullable=True)
+    assigner = relationship('Member', uselist=False)
 
     def _set_password(self, password):
         self._password = 'hashed:%s' % password
@@ -161,8 +163,13 @@ class BaseModelTestCase(unittest.TestCase):
         self.assertIsInstance(title_column, Field)
 
     def test_relationship(self):
+        assigner = Member()
+        assigner.update_from_dict(self.member_dict_sample)
+        assigner.email = 'test2@example.com'
+
         member = Member()
         member.keywords.append('keyword_one')
+        member.assigner = assigner
         member.update_from_dict(self.member_dict_sample)
         self.session.add(member)
         self.session.commit()
@@ -171,7 +178,7 @@ class BaseModelTestCase(unittest.TestCase):
 
     def test_iter_columns(self):
         columns = {c.key: c for c in Member.iter_columns(relationships=False, synonyms=False, composites=False)}
-        self.assertEqual(len(columns), 15)
+        self.assertEqual(len(columns), 16)
         self.assertNotIn('name', columns)
         self.assertNotIn('password', columns)
         self.assertIn('_password', columns)
@@ -179,7 +186,7 @@ class BaseModelTestCase(unittest.TestCase):
     def test_iter_dict_columns(self):
         columns = {c.key: c for c in Member.iter_dict_columns(
             include_readonly_columns=False, include_protected_columns=False)}
-        self.assertEqual(len(columns), 14)
+        self.assertEqual(len(columns), 16)
         self.assertNotIn('name', columns)
         self.assertNotIn('password', columns)
         self.assertNotIn('_password', columns)
