@@ -16,6 +16,10 @@ class BaseModel(object):
     __formatter__ = DefaultFormatter
 
     @classmethod
+    def get_dict_key(cls, column):
+        return column.info.get('dict_key', cls.__formatter__.export_key(column.key))
+
+    @classmethod
     def get_column(cls, column):
         if isinstance(column, str):
             mapper = inspect(cls)
@@ -32,7 +36,7 @@ class BaseModel(object):
 
     @classmethod
     def prepare_for_export(cls, column, v):
-        param_name = column.info.get('dict_key') or cls.__formatter__.export_key(column.key)
+        param_name = cls.get_dict_key(column)
         if hasattr(column, 'property') and isinstance(column.property,
                                                       RelationshipProperty) and column.property.uselist:
             result = [c.to_dict() for c in v]
@@ -101,7 +105,7 @@ class BaseModel(object):
     @classmethod
     def extract_data_from_dict(cls, context):
         for c in cls.iter_dict_columns(include_protected_columns=True, include_readonly_columns=False):
-            param_name = c.info.get('dict_key', cls.__formatter__.export_key(c.key))
+            param_name = cls.get_dict_key(c)
 
             if param_name in context:
                 value = context[param_name]
