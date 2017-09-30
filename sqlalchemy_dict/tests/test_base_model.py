@@ -110,9 +110,9 @@ class Member(DeclarativeBase):
     def is_visible(self, value):
         self.visible = value
 
+    # noinspection PyUnresolvedReferences
     @is_visible.expression
     def is_visible(self):
-        # noinspection PyUnresolvedReferences
         return self.visible.is_(True)
 
 
