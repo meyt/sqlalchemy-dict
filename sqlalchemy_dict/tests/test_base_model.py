@@ -10,6 +10,7 @@ from sqlalchemy.orm import synonym, Session
 from sqlalchemy.sql.schema import MetaData
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from sqlalchemy_dict import BaseModel, Field, relationship, composite
 
@@ -101,6 +102,19 @@ class Member(DeclarativeBase):
 
     password = synonym('_password', descriptor=property(_get_password, _set_password), info=dict(protected=True))
 
+    @hybrid_property
+    def is_visible(self):
+        return self.visible
+
+    @is_visible.setter
+    def is_visible(self, value):
+        self.visible = value
+
+    @is_visible.expression
+    def is_visible(self):
+        # noinspection PyUnresolvedReferences
+        return self.visible.is_(True)
+
 
 class BaseModelTestCase(unittest.TestCase):
     member_dict_sample = {
@@ -112,6 +126,7 @@ class BaseModelTestCase(unittest.TestCase):
         'birth': '2001-01-01',
         'weight': 1.1,
         'visible': 'false',
+        'isVisible': False,
         'lastLoginTime': '2017-10-10T10:10:00.12313',
         'role': 'admin',
         'meta': {
@@ -181,7 +196,7 @@ class BaseModelTestCase(unittest.TestCase):
 
     def test_iter_columns(self):
         columns = {c.key: c for c in Member.iter_columns(relationships=False, synonyms=False, composites=False)}
-        self.assertEqual(len(columns), 16)
+        self.assertEqual(len(columns), 17)
         self.assertNotIn('name', columns)
         self.assertNotIn('password', columns)
         self.assertIn('_password', columns)
@@ -189,7 +204,7 @@ class BaseModelTestCase(unittest.TestCase):
     def test_iter_dict_columns(self):
         columns = {c.key: c for c in Member.iter_dict_columns(
             include_readonly_columns=False, include_protected_columns=False)}
-        self.assertEqual(len(columns), 16)
+        self.assertEqual(len(columns), 17)
         self.assertNotIn('name', columns)
         self.assertNotIn('password', columns)
         self.assertNotIn('_password', columns)
