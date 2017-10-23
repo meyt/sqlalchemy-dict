@@ -201,6 +201,17 @@ class BaseModelTestCase(unittest.TestCase):
         self.assertNotIn('password', columns)
         self.assertIn('_password', columns)
 
+        columns = {c.key: c for c in Member.iter_columns(
+            relationships=False,
+            synonyms=False,
+            composites=False,
+            use_inspection=False
+        )}
+        self.assertEqual(len(columns), 16)
+        self.assertNotIn('is_visible', columns)
+        self.assertNotIn('_password', columns)
+        self.assertIn('password', columns)
+
     def test_iter_dict_columns(self):
         columns = {c.key: c for c in Member.iter_dict_columns(
             include_readonly_columns=False, include_protected_columns=False)}

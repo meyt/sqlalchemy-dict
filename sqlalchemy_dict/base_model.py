@@ -76,22 +76,28 @@ class BaseModel(object):
             )
 
     @classmethod
-    def iter_columns(cls, relationships=True, synonyms=True, composites=True, hybrids=True):
-        mapper = inspect(cls)
-        for k, c in mapper.all_orm_descriptors.items():
+    def iter_columns(cls, relationships=True, synonyms=True, composites=True, use_inspection=True, hybrids=True):
+        if use_inspection:
+            mapper = inspect(cls)
+            for k, c in mapper.all_orm_descriptors.items():
 
-            if k == '__mapper__':
-                continue
+                if k == '__mapper__':
+                    continue
 
-            if c.extension_type == ASSOCIATION_PROXY:
-                continue
+                if c.extension_type == ASSOCIATION_PROXY:
+                    continue
 
-            if (not hybrids and c.extension_type == HYBRID_PROPERTY) \
-                    or (not relationships and k in mapper.relationships) \
-                    or (not synonyms and k in mapper.synonyms) \
-                    or (not composites and k in mapper.composites):
-                continue
-            yield getattr(cls, k)
+                if (not hybrids and c.extension_type == HYBRID_PROPERTY) \
+                        or (not relationships and k in mapper.relationships) \
+                        or (not synonyms and k in mapper.synonyms) \
+                        or (not composites and k in mapper.composites):
+                    continue
+                yield getattr(cls, k)
+
+        else:
+            # noinspection PyUnresolvedReferences
+            for c in cls.__table__.c:
+                yield c
 
     @classmethod
     def iter_dict_columns(cls, include_readonly_columns=True, include_protected_columns=False, **kw):
