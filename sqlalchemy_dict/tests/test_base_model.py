@@ -36,6 +36,17 @@ class JsonType(TypeDecorator):  # pragma: no cover
         return dict
 
 
+# noinspection PyAbstractClass
+class MyType(TypeDecorator):
+    impl = Unicode
+
+    def process_bind_param(self, value, dialect):
+        return "PREFIX:" + value
+
+    def process_result_value(self, value, dialect):
+        return value[7:]
+
+
 class FullName(object):  # pragma: no cover
     def __init__(self, first_name, last_name):
         self.first_name = first_name
@@ -93,6 +104,7 @@ class Member(DeclarativeBase):
     meta = Field(JsonType)
     assigner_id = Field(Integer, ForeignKey('member.id'), nullable=True)
     assigner = relationship('Member', uselist=False)
+    my_type = Field(MyType, default='init')
 
     def _set_password(self, password):
         self._password = 'hashed:%s' % password
@@ -129,6 +141,7 @@ class BaseModelTestCase(unittest.TestCase):
         'isVisible': False,
         'lastLoginTime': '2017-10-10T10:10:00.12313',
         'role': 'admin',
+        'myType': 'test',
         'meta': {
             'score': 5,
             'language': 'english'
@@ -196,7 +209,7 @@ class BaseModelTestCase(unittest.TestCase):
 
     def test_iter_columns(self):
         columns = {c.key: c for c in Member.iter_columns(relationships=False, synonyms=False, composites=False)}
-        self.assertEqual(len(columns), 17)
+        self.assertEqual(len(columns), 18)
         self.assertNotIn('name', columns)
         self.assertNotIn('password', columns)
         self.assertIn('_password', columns)
@@ -207,7 +220,7 @@ class BaseModelTestCase(unittest.TestCase):
             composites=False,
             use_inspection=False
         )}
-        self.assertEqual(len(columns), 16)
+        self.assertEqual(len(columns), 17)
         self.assertNotIn('is_visible', columns)
         self.assertNotIn('_password', columns)
         self.assertIn('password', columns)
@@ -215,7 +228,7 @@ class BaseModelTestCase(unittest.TestCase):
     def test_iter_dict_columns(self):
         columns = {c.key: c for c in Member.iter_dict_columns(
             include_readonly_columns=False, include_protected_columns=False)}
-        self.assertEqual(len(columns), 17)
+        self.assertEqual(len(columns), 18)
         self.assertNotIn('name', columns)
         self.assertNotIn('password', columns)
         self.assertNotIn('_password', columns)
@@ -321,6 +334,7 @@ class BaseModelTestCase(unittest.TestCase):
                 'breakfastTime': '08-08-08'
             })
             member.update_from_dict(member_dict)
+
 
 if __name__ == '__main__':  # pragma: no cover
     unittest.main()

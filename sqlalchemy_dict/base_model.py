@@ -30,8 +30,11 @@ class BaseModel(object):
     def import_value(cls, column, v):
         c = cls.get_column(column)
         if isinstance(c, Column) or isinstance(c, InstrumentedAttribute):
-            if c.type.python_type is bool and not isinstance(v, bool):
-                return str(v).lower() == 'true'
+            try:
+                if c.type.python_type is bool and not isinstance(v, bool):
+                    return str(v).lower() == 'true'
+            except NotImplementedError:
+                pass
         return v
 
     @classmethod
