@@ -105,6 +105,7 @@ class Member(DeclarativeBase):
     assigner_id = Field(Integer, ForeignKey('member.id'), nullable=True)
     assigner = relationship('Member', uselist=False)
     my_type = Field(MyType, default='init')
+    _avatar = Field('avatar', Unicode(255), nullable=True, protected=True)
 
     def _set_password(self, password):
         self._password = 'hashed:%s' % password
@@ -113,6 +114,14 @@ class Member(DeclarativeBase):
         return self._password
 
     password = synonym('_password', descriptor=property(_get_password, _set_password), info=dict(protected=True))
+
+    def _set_avatar(self, avatar):  # pragma: no cover
+        self._avatar = 'avatar:%s' % avatar
+
+    def _get_avatar(self):  # pragma: no cover
+        return self._avatar
+
+    avatar = synonym('_avatar', descriptor=property(_get_avatar, _set_avatar), info=dict(protected=False))
 
     @hybrid_property
     def is_visible(self):
@@ -209,7 +218,7 @@ class BaseModelTestCase(unittest.TestCase):
 
     def test_iter_columns(self):
         columns = {c.key: c for c in Member.iter_columns(relationships=False, synonyms=False, composites=False)}
-        self.assertEqual(len(columns), 18)
+        self.assertEqual(len(columns), 19)
         self.assertNotIn('name', columns)
         self.assertNotIn('password', columns)
         self.assertIn('_password', columns)
@@ -220,7 +229,7 @@ class BaseModelTestCase(unittest.TestCase):
             composites=False,
             use_inspection=False
         )}
-        self.assertEqual(len(columns), 17)
+        self.assertEqual(len(columns), 18)
         self.assertNotIn('is_visible', columns)
         self.assertNotIn('_password', columns)
         self.assertIn('password', columns)
@@ -228,10 +237,12 @@ class BaseModelTestCase(unittest.TestCase):
     def test_iter_dict_columns(self):
         columns = {c.key: c for c in Member.iter_dict_columns(
             include_readonly_columns=False, include_protected_columns=False)}
-        self.assertEqual(len(columns), 18)
+        self.assertEqual(len(columns), 19)
         self.assertNotIn('name', columns)
         self.assertNotIn('password', columns)
         self.assertNotIn('_password', columns)
+        self.assertNotIn('_avatar', columns)
+        self.assertIn('avatar', columns)
 
     def test_datetime_format(self):
         member = Member()

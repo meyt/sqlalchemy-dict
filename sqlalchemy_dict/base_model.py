@@ -105,8 +105,13 @@ class BaseModel(object):
     @classmethod
     def iter_dict_columns(cls, include_readonly_columns=True, include_protected_columns=False, **kw):
         for c in cls.iter_columns(**kw):
-            if (not include_protected_columns and c.info.get('protected')) or \
-                    (not include_readonly_columns and c.info.get('readonly')):
+            info = c.info
+            # Use original property for proxies
+            if hasattr(c, 'original_property') and c.original_property:
+                info = c.original_property.info
+
+            if (not include_protected_columns and info.get('protected')) or \
+                    (not include_readonly_columns and info.get('readonly')):
                 continue
 
             yield c
