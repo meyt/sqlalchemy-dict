@@ -195,6 +195,22 @@ class BaseModelTestCase(unittest.TestCase):
         result = testing_expose(title='What?')
         self.assertEqual(result, None)
 
+        # Boolean value
+        member.update_from_dict(dict(
+            visible=True
+        ))
+        self.assertEqual(member.visible, True)
+
+        member.update_from_dict(dict(
+            visible=False
+        ))
+        self.assertEqual(member.visible, False)
+
+        member.update_from_dict(dict(
+            visible=None
+        ))
+        self.assertEqual(member.visible, None)
+
     def test_get_column(self):
         title_column = Member.get_column('title')
         self.assertIsInstance(title_column, Field)

@@ -31,7 +31,7 @@ class BaseModel(object):
         c = cls.get_column(column)
         if isinstance(c, Column) or isinstance(c, InstrumentedAttribute):
             try:
-                if c.type.python_type is bool and not isinstance(v, bool):
+                if c.type.python_type is bool and not isinstance(v, bool) and v is not None:
                     return str(v).lower() == 'true'
             except NotImplementedError:
                 pass
