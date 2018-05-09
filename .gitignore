@@ -3,3 +3,4 @@
 dist/
 sqlalchemy_dict.egg-info/
 __pycache__/
+venv/
