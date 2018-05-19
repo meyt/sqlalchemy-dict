@@ -5,15 +5,30 @@ from sqlalchemy.orm import relationship as sa_relationship, composite as sa_comp
 
 # noinspection PyAbstractClass
 class Field(Column):
+    """
+    An overridden class from ``sqlalchemy.Column`` to apply ``sqlalchemy_dict`` properties.
+    """
 
     def __init__(self,
                  *args,
                  dict_key=None,
                  readonly=None,
                  protected=None,
-                 nullable=False,
                  info=None,
                  **kwargs):
+        """
+        Initialize the field
+
+        :param args: Positional-arguments that directly pass into ``sqlalchemy.Column.__init__``
+        :param dict_key: Custom dictionary key related to this field, as default it
+                         will reads the field name and format
+                         (using ``sqlalchemy_dict.BaseModel.__formatter__``) it before export.
+        :param readonly: Make field read-only, it's mean this field will not accept any value from
+                         ``sqlalchemy_dict.BaseModel.update_from_dict`` input dictionary.
+        :param protected: Make field protected to representation
+        :param info: Pass into Column info
+        :param kwargs: Keyword-arguments that directly pass into  ``sqlalchemy.Column.__init__``
+        """
         info = info or dict()
 
         if dict_key is not None:
@@ -25,7 +40,7 @@ class Field(Column):
         if protected is not None:
             info['protected'] = protected
 
-        super(Field, self).__init__(*args, info=info, nullable=nullable, **kwargs)
+        super(Field, self).__init__(*args, info=info, **kwargs)
 
 
 def relationship(*args, dict_key=None, protected=None, **kwargs):

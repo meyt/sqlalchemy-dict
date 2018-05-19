@@ -32,3 +32,33 @@ DefaultFormatter
 ^^^^^^^^^^^^^^^^
 
 .. autoclass:: DefaultFormatter
+
+
+
+
+
+field Module
+----------------
+
+.. module:: sqlalchemy_dict.field
+
+
+Field
+^^^^^
+
+.. autoclass:: Field
+    :members:
+
+    .. automethod:: __init__
+
+relationship
+^^^^^^^^^^^^
+
+.. autofunction:: relationship
+
+
+
+composite
+^^^^^^^^^
+
+.. autofunction:: composite
