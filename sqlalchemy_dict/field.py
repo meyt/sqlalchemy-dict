@@ -43,7 +43,18 @@ class Field(Column):
         super(Field, self).__init__(*args, info=info, **kwargs)
 
 
-def relationship(*args, dict_key=None, protected=None, **kwargs):
+def relationship(*args, dict_key: str=None, protected: bool=None, **kwargs):
+    """
+    Same as ``sqlalchemy.orm.relationship`` with extra arguments to use in ``sqlalchemy_dict``.
+
+    :param args: Positional-arguments that directly pass into ``sqlalchemy.orm.relationship``.
+    :param dict_key: Custom dictionary key.
+                     default is formatted (using ``sqlalchemy_dict.BaseModel.__formatter__``)
+                     attribute name (where ``relationship`` called).
+    :param protected: Make field protected to representation.
+    :param kwargs: Keyword-arguments that directly pass into ``sqlalchemy.orm.relationship``.
+    :return:
+    """
     info = dict()
 
     if dict_key:
