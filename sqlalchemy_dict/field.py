@@ -67,6 +67,18 @@ def relationship(*args, dict_key: str=None, protected: bool=None, **kwargs):
 
 
 def composite(*args, dict_key=None, protected=None, readonly=None, **kwargs):
+    """
+    Same as ``sqlalchemy.orm.composite`` with extra arguments to use in ``sqlalchemy_dict``.
+    :param args: Positional-arguments that directly pass into ``sqlalchemy.orm.composite``.
+    :param dict_key: Custom dictionary key.
+                     default is formatted (using ``sqlalchemy_dict.BaseModel.__formatter__``)
+                     attribute name (where ``composite`` called).
+    :param protected:  Make field protected to representation.
+    :param readonly: Make field read-only, it's mean this field will not accept any value from
+                     ``sqlalchemy_dict.BaseModel.update_from_dict`` input dictionary.
+    :param kwargs: Keyword-arguments that directly pass into ``sqlalchemy.orm.composite``.
+    :return:
+    """
     info = dict()
 
     if dict_key:
