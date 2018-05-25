@@ -69,6 +69,7 @@ def relationship(*args, dict_key: str=None, protected: bool=None, **kwargs):
 def composite(*args, dict_key=None, protected=None, readonly=None, **kwargs):
     """
     Same as ``sqlalchemy.orm.composite`` with extra arguments to use in ``sqlalchemy_dict``.
+
     :param args: Positional-arguments that directly pass into ``sqlalchemy.orm.composite``.
     :param dict_key: Custom dictionary key.
                      default is formatted (using ``sqlalchemy_dict.BaseModel.__formatter__``)
