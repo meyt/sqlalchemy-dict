@@ -26,6 +26,7 @@ Formatter
 ^^^^^^^^^
 
 .. autoclass:: Formatter
+    :members:
 
 
 DefaultFormatter
