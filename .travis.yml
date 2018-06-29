@@ -1,14 +1,29 @@
 language: python
+
 python:
-- 3.3
-- 3.4
-- 3.5
-- 3.6
-- nightly
+  - 3.3
+  - 3.4
+  - 3.5
+  - 3.6
+  - nightly
+
 before_install:
-- pip install -U pip setuptools wheel
-- pip install -r requirements-dev.txt
+  - pip install -U pip setuptools wheel
+  - pip install -r requirements-dev.txt
+
 install: pip install -e .
-script: coverage run --source sqlalchemy_dict $(which nosetests)
-after_success: if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then travis_retry coveralls
-  ; fi
+
+script:
+  - coverage run --source sqlalchemy_dict $(which nosetests)
+  - sphinx-build -nW -b html doc doc/_build/html
+
+after_success: if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then travis_retry coveralls ; fi
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_ACCESS_TOKEN
+  target-branch: gh-pages
+  local-dir: doc/_build/html
+  on:
+    branch: master
