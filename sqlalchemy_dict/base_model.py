@@ -180,10 +180,10 @@ class BaseModel(object):
         :return:
         """
         for c in cls.iter_columns(**kw):
-            info = c.info
             # Use original property for proxies
-            if hasattr(c, 'original_property') and c.original_property:
-                info = c.original_property.info
+            info = (
+                c.original_property if hasattr(c, 'original_property') and c.original_property else c
+            ).info
 
             if (not include_protected_columns and info.get('protected')) or \
                     (not include_readonly_columns and info.get('readonly')):
