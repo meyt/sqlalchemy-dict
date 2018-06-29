@@ -97,6 +97,8 @@ def synonym(*args, dict_key: str=None, protected: bool=None, readonly: bool=None
     """
     Same as ``sqlalchemy.orm.synonym`` with extra arguments to use in ``sqlalchemy_dict``.
 
+    .. versionadded:: 0.4.0
+
     :param args: Positional-arguments that directly pass into ``sqlalchemy.orm.synonym``.
     :param dict_key: Custom dictionary key.
                      default is formatted (using ``sqlalchemy_dict.BaseModel.__formatter__``)

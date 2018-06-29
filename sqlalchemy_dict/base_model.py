@@ -66,6 +66,9 @@ class BaseModel(object):
     def get_column_info(cls, column: Column) -> dict:
         """
         Get column info, it will merge `info` from proxy properties
+
+        .. versionadded:: 0.4.0
+
         :param column:
         :return:
         """
