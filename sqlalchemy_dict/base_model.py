@@ -47,7 +47,7 @@ class BaseModel(object):
         :param column:
         :return:
         """
-        return column.info.get('dict_key', cls.__formatter__.export_key(column.key))
+        return cls.get_column_info(column.info).get('dict_key', cls.__formatter__.export_key(column.key))
 
     @classmethod
     def get_column(cls, column: Union[Column, str]):
@@ -63,7 +63,7 @@ class BaseModel(object):
         return column
 
     @classmethod
-    def get_column_info(cls, column: Column):
+    def get_column_info(cls, column: Column) -> dict:
         """
         Get column info, it will merge `info` from proxy properties
         :param column:
