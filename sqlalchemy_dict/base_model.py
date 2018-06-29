@@ -63,6 +63,22 @@ class BaseModel(object):
         return column
 
     @classmethod
+    def get_column_info(cls, column: Column):
+        """
+        Get column info, it will merge `info` from proxy properties
+        :param column:
+        :return:
+        """
+        # Use original property for proxies
+        if hasattr(column, 'original_property') and column.original_property:
+            info = column.info.copy()
+            info.update(column.original_property.info)
+        else:
+            info = column.info
+
+        return info
+
+    @classmethod
     def import_value(cls, column: Union[Column, str], v):
         """
         Import value for a column.
@@ -179,17 +195,14 @@ class BaseModel(object):
         :param kw:
         :return:
         """
-        for c in cls.iter_columns(**kw):
-            # Use original property for proxies
-            info = (
-                c.original_property if hasattr(c, 'original_property') and c.original_property else c
-            ).info
+        for column in cls.iter_columns(**kw):
+            info = cls.get_column_info(column)
 
             if (not include_protected_columns and info.get('protected')) or \
                     (not include_readonly_columns and info.get('readonly')):
                 continue
 
-            yield c
+            yield column
 
     @classmethod
     def extract_data_from_dict(cls, context: dict) -> Generator[Tuple[Column, Any], None, None]:
