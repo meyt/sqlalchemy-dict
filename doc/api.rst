@@ -63,3 +63,9 @@ composite
 ^^^^^^^^^
 
 .. autofunction:: composite
+
+
+synonym
+^^^^^^^
+
+.. autofunction:: synonym
