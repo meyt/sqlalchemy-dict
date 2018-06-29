@@ -17,8 +17,8 @@ script:
   - coverage run --source sqlalchemy_dict $(which nosetests)
 
 after_success: if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then
-  pip install -r requirements-doc.txt ;
-  sphinx-build -nW -b html doc doc/_build/html;
+  pip install -r requirements-doc.txt &&
+  sphinx-build -nW -b html doc doc/_build/html &&
   travis_retry coveralls ; fi
 
 deploy:
