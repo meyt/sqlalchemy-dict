@@ -10,15 +10,16 @@ python:
 before_install:
   - pip install -U pip setuptools wheel
   - pip install -r requirements-dev.txt
-  - pip install -r requirements-doc.txt
 
 install: pip install -e .
 
 script:
   - coverage run --source sqlalchemy_dict $(which nosetests)
-  - sphinx-build -nW -b html doc doc/_build/html
 
-after_success: if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then travis_retry coveralls ; fi
+after_success: if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then
+  pip install -r requirements-doc.txt ;
+  sphinx-build -nW -b html doc doc/_build/html;
+  travis_retry coveralls ; fi
 
 deploy:
   provider: pages
