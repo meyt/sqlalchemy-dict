@@ -19,6 +19,7 @@ script:
 after_success: if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then
   pip install -r requirements-doc.txt &&
   sphinx-build -nW -b html doc doc/_build/html &&
+  touch doc/build/html/.nojekyll &&
   travis_retry coveralls ; fi
 
 deploy:
@@ -26,9 +27,7 @@ deploy:
   skip-cleanup: true
   github-token: $GITHUB_ACCESS_TOKEN
   target-branch: gh-pages
-  local-dir:
-   - doc/_build/html
-   - .nojekyll
+  local-dir: doc/_build/html
   on:
     branch: master
     condition: $TRAVIS_PYTHON_VERSION = '3.5'
