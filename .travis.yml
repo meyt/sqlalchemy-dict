@@ -26,7 +26,9 @@ deploy:
   skip-cleanup: true
   github-token: $GITHUB_ACCESS_TOKEN
   target-branch: gh-pages
-  local-dir: doc/_build/html
+  local-dir:
+    - doc/_build/html
+    - doc/_static
   on:
     branch: master
     condition: $TRAVIS_PYTHON_VERSION = '3.5'
