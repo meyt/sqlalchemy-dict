@@ -29,3 +29,4 @@ deploy:
   local-dir: doc/_build/html
   on:
     branch: master
+    condition: $TRAVIS_PYTHON_VERSION = '3.5'
