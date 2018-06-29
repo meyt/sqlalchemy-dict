@@ -6,13 +6,13 @@ from sqlalchemy import (
     Integer, Float, ForeignKey, Boolean,
     create_engine, Enum, TypeDecorator
 )
-from sqlalchemy.orm import synonym, Session
+from sqlalchemy.orm import Session
 from sqlalchemy.sql.schema import MetaData
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from sqlalchemy_dict import BaseModel, Field, relationship, composite
+from sqlalchemy_dict import BaseModel, Field, relationship, composite, synonym
 
 metadata = MetaData()
 DeclarativeBase = declarative_base(cls=BaseModel, metadata=metadata)
@@ -106,6 +106,7 @@ class Member(DeclarativeBase):
     assigner = relationship('Member', uselist=False)
     my_type = Field(MyType, default='init')
     _avatar = Field('avatar', Unicode(255), nullable=True, protected=True)
+    _cover = Field('cover', Unicode(255), nullable=True, protected=True)
 
     def _set_password(self, password):
         self._password = 'hashed:%s' % password
@@ -113,7 +114,11 @@ class Member(DeclarativeBase):
     def _get_password(self):  # pragma: no cover
         return self._password
 
-    password = synonym('_password', descriptor=property(_get_password, _set_password), info=dict(protected=True))
+    password = synonym(
+        '_password',
+        descriptor=property(_get_password, _set_password),
+        protected=True
+    )
 
     def _set_avatar(self, avatar):  # pragma: no cover
         self._avatar = 'avatar:%s' % avatar
@@ -121,7 +126,24 @@ class Member(DeclarativeBase):
     def _get_avatar(self):  # pragma: no cover
         return self._avatar
 
-    avatar = synonym('_avatar', descriptor=property(_get_avatar, _set_avatar), info=dict(protected=False))
+    avatar = synonym(
+        '_avatar',
+        descriptor=property(_get_avatar, _set_avatar),
+        protected=False
+    )
+
+    def _set_cover(self, cover):  # pragma: no cover
+        self._cover = 'cover:%s' % cover
+
+    def _get_cover(self):  # pragma: no cover
+        return self._cover
+
+    cover = synonym(
+        '_cover',
+        descriptor=property(_get_cover, _set_cover),
+        dict_key='coverImage',
+        readonly=True
+    )
 
     @hybrid_property
     def is_visible(self):
@@ -234,7 +256,7 @@ class BaseModelTestCase(unittest.TestCase):
 
     def test_iter_columns(self):
         columns = {c.key: c for c in Member.iter_columns(relationships=False, synonyms=False, composites=False)}
-        self.assertEqual(len(columns), 19)
+        self.assertEqual(len(columns), 20)
         self.assertNotIn('name', columns)
         self.assertNotIn('password', columns)
         self.assertIn('_password', columns)
@@ -245,7 +267,7 @@ class BaseModelTestCase(unittest.TestCase):
             composites=False,
             use_inspection=False
         )}
-        self.assertEqual(len(columns), 18)
+        self.assertEqual(len(columns), 19)
         self.assertNotIn('is_visible', columns)
         self.assertNotIn('_password', columns)
         self.assertIn('password', columns)
@@ -258,6 +280,7 @@ class BaseModelTestCase(unittest.TestCase):
         self.assertNotIn('password', columns)
         self.assertNotIn('_password', columns)
         self.assertNotIn('_avatar', columns)
+        self.assertNotIn('coverImage', columns)
         self.assertIn('avatar', columns)
 
     def test_datetime_format(self):
