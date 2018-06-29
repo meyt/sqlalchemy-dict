@@ -10,6 +10,9 @@ sqlalchemy-dict
 .. image:: https://img.shields.io/pypi/pyversions/sqlalchemy-dict.svg
     :target: https://pypi.python.org/pypi/sqlalchemy_dict
 
+- `Documentation <https://meyt.github.io/sqlalchemy-dict>`_
+
+
 sqlalchemy extension for interacting models with python dictionary.
 It's main idea and source comes from part of `restfulpy <https://github.com/Carrene/restfulpy>`_
 , actually it's orm submodule.
