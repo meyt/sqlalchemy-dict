@@ -47,7 +47,7 @@ class BaseModel(object):
         :param column:
         :return:
         """
-        return cls.get_column_info(column.info).get('dict_key', cls.__formatter__.export_key(column.key))
+        return cls.get_column_info(column).get('dict_key', cls.__formatter__.export_key(column.key))
 
     @classmethod
     def get_column(cls, column: Union[Column, str]):
