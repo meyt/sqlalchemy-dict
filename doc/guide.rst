@@ -5,7 +5,8 @@ Guide
 Usage
 -----
 
-First of all we'll setup :func:`sqlalchemy_dict.base_model.BaseModel` as base class for sqlalchemy ``DeclarativeBase``:
+First of all we'll setup :func:`BaseModel <sqlalchemy_dict.base_model.BaseModel>`
+as base class for sqlalchemy ``DeclarativeBase``:
 
 .. code-block:: python
 
@@ -112,3 +113,24 @@ properties (
 
 - ``readonly``: Make property just readonly and will not update values from input dictionary.
 - ``protected``: Will remove a field from output dictionary.
+
+
+Query dumping
+-------------
+
+Queries can easily dump with :func:`dump_query <sqlalchemy_dict.base_model.BaseModel.dump_query>` method:
+
+.. code-block:: python
+
+    all_mikes_list = Member.dump_query(
+        Member.query.filter(Member.first_name.like('mike'))
+    )
+
+or using :func:`expose <sqlalchemy_dict.base_model.BaseModel.expose>` decorator:
+
+
+.. code-block:: python
+
+    @Member.expose
+    def get_all_mikes():
+        return Member.query.filter(Member.first_name.like('mike'))
