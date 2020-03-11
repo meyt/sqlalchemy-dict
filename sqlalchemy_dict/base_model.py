@@ -92,10 +92,24 @@ class BaseModel(object):
         c = cls.get_column(column)
         if isinstance(c, Column) or isinstance(c, InstrumentedAttribute):
             try:
-                if c.type.python_type is bool and not isinstance(v, bool) and v is not None:
+                if v is None:
+                    return v
+
+                if c.type.python_type is bool and not isinstance(v, bool):
                     return str(v).lower() == 'true'
+
+                if c.type.python_type == datetime:
+                    return cls.__formatter__.import_datetime(v)
+
+                if c.type.python_type == date:
+                    return cls.__formatter__.import_date(v)
+
+                if c.type.python_type == time:
+                    return cls.__formatter__.import_time(v)
+
             except NotImplementedError:
                 pass
+
         return v
 
     @classmethod
@@ -162,7 +176,7 @@ class BaseModel(object):
         :param composites: Include composites
         :param use_inspection: Force to use ``sqlalchemy`` inspector
         :param hybrids: Include hybrids
-        :return: 
+        :return:
         """
         if use_inspection:
             mapper = inspect(cls)
@@ -220,24 +234,8 @@ class BaseModel(object):
 
             if param_name in context:
                 value = context[param_name]
-                # Ensuring the python type, and ignoring silently if python type is not specified
-                try:
-                    c.type.python_type
-                except NotImplementedError:
-                    yield c, value
-                    continue
 
-                if c.type.python_type == datetime:
-                    yield c, cls.__formatter__.import_datetime(value)
-
-                elif c.type.python_type == date:
-                    yield c, cls.__formatter__.import_date(value)
-
-                elif c.type.python_type == time:
-                    yield c, cls.__formatter__.import_time(value)
-
-                else:
-                    yield c, value
+                yield c, value
 
     def to_dict(self) -> dict:
         """
