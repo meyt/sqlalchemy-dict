@@ -336,6 +336,27 @@ class BaseModelTestCase(unittest.TestCase):
         member_result_dict = member.to_dict()
         self.assertEqual(member_result_dict['lastLoginTime'], '2017-10-10T10:10:00.004546')
 
+        # datetime with timezone
+        member = Member()
+        member_dict = dict(self.member_dict_sample)
+        member_dict.update({
+            'lastLoginTime': '2017-10-10T10:10:00.4546+03:00'
+        })
+        member.update_from_dict(member_dict)
+        member_result_dict = member.to_dict()
+        self.assertEqual(member_result_dict['lastLoginTime'], '2017-10-10T10:10:00.004546+03:00')
+
+        # datetime without microsecond
+        member = Member()
+        member_dict = dict(self.member_dict_sample)
+        member_dict.update({
+            'lastLoginTime': '2017-10-10T10:10:00+03:00'
+        })
+        member.update_from_dict(member_dict)
+        member_result_dict = member.to_dict()
+        self.assertEqual(member_result_dict['lastLoginTime'], '2017-10-10T10:10:00+03:00')
+
+
     def test_date_format(self):
         # iso date format
         member = Member()

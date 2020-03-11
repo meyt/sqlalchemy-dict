@@ -66,13 +66,10 @@ def format_iso_time(stamp):
         ...     tzinfo=EET()))
         '12:52:29+02:00'
     """
-    if stamp.tzinfo:
-        if stamp.utcoffset() == ZERO:
-            return stamp.replace(tzinfo=None).isoformat() + 'Z'
-        else:
-            return stamp.isoformat()
-    else:
-        return stamp.isoformat()
+    if stamp.tzinfo and stamp.utcoffset() == ZERO:
+        return stamp.replace(tzinfo=None).isoformat() + 'Z'
+
+    return stamp.isoformat()
 
 
 def to_camel_case(text):

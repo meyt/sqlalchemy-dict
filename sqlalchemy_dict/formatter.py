@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, date, time
+from datetime import datetime, timedelta, timezone, date, time
 
 from sqlalchemy_dict.utils import format_iso_datetime, format_iso_time, to_camel_case
 from sqlalchemy_dict.constants import ISO_DATETIME_FORMAT, ISO_DATE_FORMAT, ISO_DATETIME_PATTERN, ISO_TIME_FORMAT
@@ -109,6 +109,17 @@ class DefaultFormatter(Formatter):
         res = datetime.strptime(match.groups()[0], ISO_DATETIME_FORMAT)
         if match.group(2) and len(match.group(2)) > 0:
             res = res.replace(microsecond=int(match.group(2)))
+
+        if match.group(3) and len(match.group(3)) > 0:
+            tzstr = match.group(3)
+            if tzstr.lower() != 'z':
+                hours, minutes = tzstr.split(':')
+                hours, minutes = int(hours), int(minutes)
+                tzinfo = timezone(timedelta(hours=hours, minutes=minutes))
+            else:
+                tzinfo = None
+            res = res.replace(tzinfo=tzinfo)
+
         return res
 
     @classmethod
