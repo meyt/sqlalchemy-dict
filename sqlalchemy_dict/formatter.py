@@ -105,7 +105,11 @@ class DefaultFormatter(Formatter):
         match = ISO_DATETIME_PATTERN.match(value)
         if not match:
             raise ValueError('Invalid datetime format')
-        return datetime.strptime(match.groups()[0], ISO_DATETIME_FORMAT)
+
+        res = datetime.strptime(match.groups()[0], ISO_DATETIME_FORMAT)
+        if match.group(2) and len(match.group(2)) > 0:
+            res = res.replace(microsecond=int(match.group(2)))
+        return res
 
     @classmethod
     def import_date(cls, value):
