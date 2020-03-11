@@ -324,7 +324,7 @@ class BaseModelTestCase(unittest.TestCase):
         })
         member.update_from_dict(member_dict)
         member_result_dict = member.to_dict()
-        self.assertEqual(member_result_dict['lastLoginTime'], '2017-10-10T10:10:00.004546')
+        self.assertEqual(member_result_dict['lastLoginTime'], '2017-10-10T10:10:00.004546+00:00')
 
         # datetime containing ending Z
         member = Member()
@@ -334,7 +334,7 @@ class BaseModelTestCase(unittest.TestCase):
         })
         member.update_from_dict(member_dict)
         member_result_dict = member.to_dict()
-        self.assertEqual(member_result_dict['lastLoginTime'], '2017-10-10T10:10:00.004546')
+        self.assertEqual(member_result_dict['lastLoginTime'], '2017-10-10T10:10:00.004546+00:00')
 
         # datetime with timezone
         member = Member()
