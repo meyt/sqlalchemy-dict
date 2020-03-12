@@ -111,15 +111,8 @@ class DefaultFormatter(Formatter):
         match = ISO_DATETIME_PATTERN.match(value)
         if not match:
             raise ValueError("Invalid datetime format")
-        timestr = match.groups()[0]
-        tzstr = match.group(3)
-        timestr += (
-            tzstr.replace(":", "")
-            if tzstr and len(tzstr) > 0 and tzstr.lower() != "z"
-            else "+0000"
-        )
 
-        res = datetime.strptime(timestr, ISO_DATETIME_FORMAT)
+        res = datetime.strptime(match.group(1), ISO_DATETIME_FORMAT)
         if match.group(2) and len(match.group(2)) > 0:
             res = res.replace(microsecond=int(match.group(2)))
 

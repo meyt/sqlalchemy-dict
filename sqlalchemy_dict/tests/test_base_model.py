@@ -11,20 +11,14 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     Boolean,
-    create_engine,
     Enum,
     TypeDecorator,
 )
-from sqlalchemy.orm import Session
-from sqlalchemy.sql.schema import MetaData
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from sqlalchemy_dict import BaseModel, Field, relationship, composite, synonym
-
-metadata = MetaData()
-DeclarativeBase = declarative_base(cls=BaseModel, metadata=metadata)
+from sqlalchemy_dict import Field, relationship, composite, synonym
+from sqlalchemy_dict.tests.db import DeclarativeBase
 
 
 class JsonType(TypeDecorator):  # pragma: no cover
@@ -197,29 +191,6 @@ member_dict_sample = {
 }
 
 
-class DatabaseWrapper(object):
-    db_url = "sqlite:///:memory:"
-
-    def __init__(self):
-        self.engine = create_engine(self.db_url)
-        self.session = Session(self.engine)
-
-    def __enter__(self):
-        DeclarativeBase.metadata.drop_all(self.engine)
-        DeclarativeBase.metadata.create_all(self.engine)
-        return self
-
-    def __exit__(self, *args):
-        self.session.close()
-        self.session.get_bind().dispose()
-
-
-@pytest.fixture(scope="function", autouse=True)
-def db():
-    with DatabaseWrapper() as wrapper:
-        yield wrapper
-
-
 def test_update_from_dict(db):
     member = Member()
     member.update_from_dict(member_dict_sample)
@@ -327,7 +298,7 @@ def test_iter_dict_columns():
     assert "avatar" in columns
 
 
-def test_datetime_format():
+def test_datetime_format(pgdb):
     member = Member()
     member_dict = dict(member_dict_sample)
     member_dict.update({"lastLoginTime": "2017-10-10T10:10:00."})
@@ -358,10 +329,7 @@ def test_datetime_format():
     member_dict.update({"lastLoginTime": "2017-10-10T10:10:00.4546"})
     member.update_from_dict(member_dict)
     member_result_dict = member.to_dict()
-    assert (
-        member_result_dict["lastLoginTime"]
-        == "2017-10-10T10:10:00.004546+00:00"
-    )
+    assert member_result_dict["lastLoginTime"] == "2017-10-10T10:10:00.004546"
 
     # datetime containing ending Z
     member = Member()
@@ -369,10 +337,7 @@ def test_datetime_format():
     member_dict.update({"lastLoginTime": "2017-10-10T10:10:00.4546Z"})
     member.update_from_dict(member_dict)
     member_result_dict = member.to_dict()
-    assert (
-        member_result_dict["lastLoginTime"]
-        == "2017-10-10T10:10:00.004546+00:00"
-    )
+    assert member_result_dict["lastLoginTime"] == "2017-10-10T10:10:00.004546"
 
     # datetime with timezone
     member = Member()
@@ -380,10 +345,7 @@ def test_datetime_format():
     member_dict.update({"lastLoginTime": "2017-10-10T10:10:00.4546+03:00"})
     member.update_from_dict(member_dict)
     member_result_dict = member.to_dict()
-    assert (
-        member_result_dict["lastLoginTime"]
-        == "2017-10-10T10:10:00.004546+03:00"
-    )
+    assert member_result_dict["lastLoginTime"] == "2017-10-10T10:10:00.004546"
 
     # datetime without microsecond
     member = Member()
@@ -391,7 +353,17 @@ def test_datetime_format():
     member_dict.update({"lastLoginTime": "2017-10-10T10:10:00+03:00"})
     member.update_from_dict(member_dict)
     member_result_dict = member.to_dict()
-    assert member_result_dict["lastLoginTime"] == "2017-10-10T10:10:00+03:00"
+    assert member_result_dict["lastLoginTime"] == "2017-10-10T10:10:00"
+
+    # datetime with microsecond on postgres
+    member = Member()
+    member_dict = dict(member_dict_sample)
+    member_dict.update({"lastLoginTime": "2017-10-10T10:10:00.4546+03:00"})
+    member.update_from_dict(member_dict)
+    pgdb.session.add(member)
+    pgdb.session.commit()
+    member_result_dict = member.to_dict()
+    assert member_result_dict["lastLoginTime"] == "2017-10-10T10:10:00.004546"
 
 
 def test_date_format():

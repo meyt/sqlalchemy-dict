@@ -101,6 +101,11 @@ Now you can import/export values from/to model:
     >>> member.to_dict()
     {'firstName': 'John', 'lastName': 'Doe', 'password': '123456', 'email': 'john@doe.com'}
 
+
+.. note::
+    Timezone will be ignored on datetime/time input
+
+
 Access rights
 -------------
 
