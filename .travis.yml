@@ -1,6 +1,9 @@
 dist: xenial
 language: python
 
+services:
+  - postgresql
+
 python:
   - 3.4
   - 3.5
