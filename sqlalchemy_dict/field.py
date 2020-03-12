@@ -8,7 +8,8 @@ from sqlalchemy.orm import (
 
 class Field(Column):
     """
-    An overridden class from ``sqlalchemy.Column`` to apply ``sqlalchemy_dict`` properties.
+    An overridden class from ``sqlalchemy.Column`` to apply ``sqlalchemy_dict``
+     properties.
     """
 
     def __init__(
@@ -23,15 +24,19 @@ class Field(Column):
         """
         Initialize the field
 
-        :param args: Positional-arguments that directly pass into ``sqlalchemy.Column.__init__``
-        :param dict_key: Custom dictionary key related to this field, as default it
-                         will reads the field name and format
-                         (using ``sqlalchemy_dict.BaseModel.__formatter__``) it before export.
-        :param readonly: Make field read-only, it's mean this field will not accept any value from
-                         ``sqlalchemy_dict.BaseModel.update_from_dict`` input dictionary.
+        :param args: Positional-arguments that directly pass into
+            ``sqlalchemy.Column.__init__``
+        :param dict_key: Custom dictionary key related to this field,
+            as default it will reads the field name and format
+            (using ``sqlalchemy_dict.BaseModel.__formatter__``) it before
+            export.
+        :param readonly: Make field read-only, it's mean this field will not
+            accept any value from
+            ``sqlalchemy_dict.BaseModel.update_from_dict`` input dictionary.
         :param protected: Make field protected to representation
         :param info: Pass into Column info
-        :param kwargs: Keyword-arguments that directly pass into  ``sqlalchemy.Column.__init__``
+        :param kwargs: Keyword-arguments that directly pass into
+            ``sqlalchemy.Column.__init__``
         """
         info = info or dict()
 
@@ -51,14 +56,17 @@ def relationship(
     *args, dict_key: str = None, protected: bool = None, **kwargs
 ):
     """
-    Same as ``sqlalchemy.orm.relationship`` with extra arguments to use in ``sqlalchemy_dict``.
+    Same as ``sqlalchemy.orm.relationship`` with extra arguments to use in
+    ``sqlalchemy_dict``.
 
-    :param args: Positional-arguments that directly pass into ``sqlalchemy.orm.relationship``.
-    :param dict_key: Custom dictionary key.
-                     default is formatted (using ``sqlalchemy_dict.BaseModel.__formatter__``)
-                     attribute name (where ``relationship`` called).
+    :param args: Positional-arguments that directly pass into
+        ``sqlalchemy.orm.relationship``.
+    :param dict_key: Custom dictionary key. default is formatted
+        (using ``sqlalchemy_dict.BaseModel.__formatter__``) attribute name
+        (where ``relationship`` called).
     :param protected: Make field protected to representation.
-    :param kwargs: Keyword-arguments that directly pass into ``sqlalchemy.orm.relationship``.
+    :param kwargs: Keyword-arguments that directly pass into
+        ``sqlalchemy.orm.relationship``.
     :return:
     """
     info = dict()
@@ -80,16 +88,20 @@ def composite(
     **kwargs
 ):
     """
-    Same as ``sqlalchemy.orm.composite`` with extra arguments to use in ``sqlalchemy_dict``.
+    Same as ``sqlalchemy.orm.composite`` with extra arguments to use in
+    ``sqlalchemy_dict``.
 
-    :param args: Positional-arguments that directly pass into ``sqlalchemy.orm.composite``.
-    :param dict_key: Custom dictionary key.
-                     default is formatted (using ``sqlalchemy_dict.BaseModel.__formatter__``)
-                     attribute name (where ``composite`` called).
+    :param args: Positional-arguments that directly pass into
+        ``sqlalchemy.orm.composite``.
+    :param dict_key: Custom dictionary key. default is formatted
+        (using ``sqlalchemy_dict.BaseModel.__formatter__``) attribute name
+        (where ``composite`` called).
     :param protected:  Make field protected to representation.
-    :param readonly: Make field read-only, it's mean this field will not accept any value from
-                     ``sqlalchemy_dict.BaseModel.update_from_dict`` input dictionary.
-    :param kwargs: Keyword-arguments that directly pass into ``sqlalchemy.orm.composite``.
+    :param readonly: Make field read-only, it's mean this field will not accept
+        any value from ``sqlalchemy_dict.BaseModel.update_from_dict`` input
+        dictionary.
+    :param kwargs: Keyword-arguments that directly pass into
+        ``sqlalchemy.orm.composite``.
     :return:
     """
     info = dict()
@@ -114,18 +126,22 @@ def synonym(
     **kwargs
 ):
     """
-    Same as ``sqlalchemy.orm.synonym`` with extra arguments to use in ``sqlalchemy_dict``.
+    Same as ``sqlalchemy.orm.synonym`` with extra arguments to use in
+    ``sqlalchemy_dict``.
 
     .. versionadded:: 0.4.0
 
-    :param args: Positional-arguments that directly pass into ``sqlalchemy.orm.synonym``.
-    :param dict_key: Custom dictionary key.
-                     default is formatted (using ``sqlalchemy_dict.BaseModel.__formatter__``)
-                     attribute name (where ``synonym`` called).
+    :param args: Positional-arguments that directly pass into
+        ``sqlalchemy.orm.synonym``.
+    :param dict_key: Custom dictionary key. default is formatted
+        (using ``sqlalchemy_dict.BaseModel.__formatter__``) attribute name
+        (where ``synonym`` called).
     :param protected:  Make field protected to representation.
-    :param readonly: Make field read-only, it's mean this field will not accept any value from
-                     ``sqlalchemy_dict.BaseModel.update_from_dict`` input dictionary.
-    :param kwargs: Keyword-arguments that directly pass into ``sqlalchemy.orm.synonym``.
+    :param readonly: Make field read-only, it's mean this field will not accept
+        any value from ``sqlalchemy_dict.BaseModel.update_from_dict`` input
+        dictionary.
+    :param kwargs: Keyword-arguments that directly pass into
+        ``sqlalchemy.orm.synonym``.
     :return:
     """
     info = dict()

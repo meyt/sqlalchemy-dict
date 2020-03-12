@@ -17,7 +17,8 @@ from sqlalchemy_dict import DefaultFormatter
 
 class BaseModel(object):
     """
-    BaseModel provides ``sqlalchemy_dict`` abilities ready for every ``sqlalchemy`` declarative models.
+    BaseModel provides ``sqlalchemy_dict`` abilities ready for every
+    ``sqlalchemy`` declarative models.
 
     This class should set to sqlalchemy `declarative_base
     <http://docs.sqlalchemy.org/en/latest/orm/extensions/declarative/api.html
@@ -34,7 +35,8 @@ class BaseModel(object):
 
     """
 
-    #: Model formatter class. default is :class:`sqlalchemy_dict.formatter.DefaultFormatter`
+    #: Model formatter class. default is
+    # :class:`sqlalchemy_dict.formatter.DefaultFormatter`
     __formatter__ = DefaultFormatter
 
     @classmethod
@@ -286,7 +288,8 @@ class BaseModel(object):
     @classmethod
     def expose(cls, func: Callable) -> Callable:
         """
-        A decorator to automatically convert model instance or query to dictionary or list of dictionaries.
+        A decorator to automatically convert model instance or query to
+        dictionary or list of dictionaries.
 
         :param func:
         :return:
