@@ -404,9 +404,7 @@ class BaseModelTestCase(unittest.TestCase):
         # iso time format
         member = Member()
         member_dict = dict(self.member_dict_sample)
-        member_dict.update(
-            {"breakfastTime": "08:08:08",}
-        )
+        member_dict.update({"breakfastTime": "08:08:08"})
         member.update_from_dict(member_dict)
         member_result_dict = member.to_dict()
         self.assertEqual(member_result_dict["breakfastTime"], "08:08:08")

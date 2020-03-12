@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone, date, time
+from datetime import datetime, timedelta, date, time
 
 from sqlalchemy_dict.utils import to_camel_case
 from sqlalchemy_dict.constants import (
@@ -20,7 +20,7 @@ class Formatter:
         :param key: Model field name
         :return:
         """
-        raise NotImplemented  # pragma: no cover
+        raise NotImplementedError  # pragma: no cover
 
     @classmethod
     def export_datetime(cls, value: datetime):
@@ -30,7 +30,7 @@ class Formatter:
         :param value:
         :return:
         """
-        raise NotImplemented  # pragma: no cover
+        raise NotImplementedError  # pragma: no cover
 
     @classmethod
     def export_date(cls, value: date):
@@ -40,7 +40,7 @@ class Formatter:
         :param value:
         :return:
         """
-        raise NotImplemented  # pragma: no cover
+        raise NotImplementedError  # pragma: no cover
 
     @classmethod
     def export_time(cls, value: time):
@@ -50,7 +50,7 @@ class Formatter:
         :param value:
         :return:
         """
-        raise NotImplemented  # pragma: no cover
+        raise NotImplementedError  # pragma: no cover
 
     @classmethod
     def import_datetime(cls, value: [str, int]) -> datetime:
@@ -60,7 +60,7 @@ class Formatter:
         :param value:
         :return:
         """
-        raise NotImplemented  # pragma: no cover
+        raise NotImplementedError  # pragma: no cover
 
     @classmethod
     def import_date(cls, value: [str, int]) -> date:
@@ -70,7 +70,7 @@ class Formatter:
         :param value:
         :return:
         """
-        raise NotImplemented  # pragma: no cover
+        raise NotImplementedError  # pragma: no cover
 
     @classmethod
     def import_time(cls, value: [str, int]) -> time:
@@ -80,7 +80,7 @@ class Formatter:
         :param value:
         :return:
         """
-        raise NotImplemented  # pragma: no cover
+        raise NotImplementedError  # pragma: no cover
 
 
 class DefaultFormatter(Formatter):
