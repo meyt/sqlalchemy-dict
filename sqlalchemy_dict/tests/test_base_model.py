@@ -1,5 +1,5 @@
 import json
-import unittest
+import pytest
 
 from sqlalchemy import (
     UnicodeText,
@@ -180,242 +180,256 @@ class Member(DeclarativeBase):
         return self.visible.is_(True)
 
 
-class BaseModelTestCase(unittest.TestCase):
-    member_dict_sample = {
-        "title": "test",
-        "firstName": "test",
-        "lastName": "test",
-        "email": "test@example.com",
-        "password": "123456",
-        "birth": "2001-01-01",
-        "weight": 1.1,
-        "visible": "false",
-        "isVisible": False,
-        "lastLoginTime": "2017-10-10T10:10:00.12313",
-        "role": "admin",
-        "myType": "test",
-        "meta": {"score": 5, "language": "english"},
-    }
+member_dict_sample = {
+    "title": "test",
+    "firstName": "test",
+    "lastName": "test",
+    "email": "test@example.com",
+    "password": "123456",
+    "birth": "2001-01-01",
+    "weight": 1.1,
+    "visible": "false",
+    "isVisible": False,
+    "lastLoginTime": "2017-10-10T10:10:00.12313",
+    "role": "admin",
+    "myType": "test",
+    "meta": {"score": 5, "language": "english"},
+}
 
-    def setUp(self):
-        self.engine = create_engine("sqlite:///:memory:")
+
+class DatabaseWrapper(object):
+    db_url = "sqlite:///:memory:"
+
+    def __init__(self):
+        self.engine = create_engine(self.db_url)
         self.session = Session(self.engine)
-        DeclarativeBase.metadata.create_all(self.engine)
 
-    def tearDown(self):
+    def __enter__(self):
         DeclarativeBase.metadata.drop_all(self.engine)
+        DeclarativeBase.metadata.create_all(self.engine)
+        return self
 
-    def test_update_from_dict(self):
-        member = Member()
-        member.update_from_dict(self.member_dict_sample)
+    def __exit__(self, *args):
+        self.session.close()
+        self.session.get_bind().dispose()
 
-        self.assertEqual(member.title, self.member_dict_sample["title"])
-        self.assertEqual(
-            member.password, "hashed:%s" % self.member_dict_sample["password"]
+
+@pytest.fixture(scope="function", autouse=True)
+def db():
+    with DatabaseWrapper() as wrapper:
+        yield wrapper
+
+
+def test_update_from_dict(db):
+    member = Member()
+    member.update_from_dict(member_dict_sample)
+
+    assert member.title == member_dict_sample["title"]
+    assert member.password == "hashed:%s" % member_dict_sample["password"]
+    assert member.visible is False
+    assert member.weight == 1.1
+    assert member.meta == member_dict_sample["meta"]
+    db.session.add(member)
+
+    @Member.expose
+    def testing_expose(title=None):
+        query = db.session.query(Member)
+        if title:
+            return query.filter_by(title=title).one_or_none()
+        return query
+
+    # Query output
+    result = testing_expose()
+    assert result[0]["title"] == member_dict_sample["title"]
+
+    # One object output
+    result = testing_expose(title=member_dict_sample["title"])
+    assert result["title"] == member_dict_sample["title"]
+
+    # None
+    result = testing_expose(title="What?")
+    assert result is None
+
+    # Boolean value
+    member.update_from_dict(dict(visible=True))
+    assert member.visible is True
+
+    member.update_from_dict(dict(visible=False))
+    assert member.visible is False
+
+    member.update_from_dict(dict(visible=None))
+    assert member.visible is None
+
+
+def test_get_column():
+    title_column = Member.get_column("title")
+    assert isinstance(title_column, Field)
+
+
+def test_relationship(db):
+    assigner = Member()
+    assigner.update_from_dict(member_dict_sample)
+    assigner.email = "test2@example.com"
+
+    member = Member()
+    member.keywords.append("keyword_one")
+    member.assigner = assigner
+    member.update_from_dict(member_dict_sample)
+    db.session.add(member)
+    db.session.commit()
+    result_dict = member.to_dict()
+    assert len(result_dict["KeywordsNotProtected"]) == 1
+
+    db.session.query(Member).delete()
+    db.session.commit()
+
+
+def test_iter_columns():
+    columns = {
+        c.key: c
+        for c in Member.iter_columns(
+            relationships=False, synonyms=False, composites=False
         )
-        self.assertEqual(member.visible, False)
-        self.assertEqual(member.weight, 1.1)
-        self.assertEqual(member.meta, self.member_dict_sample["meta"])
-        self.session.add(member)
+    }
+    assert len(columns) == 20
+    assert "name" not in columns
+    assert "password" not in columns
+    assert "_password" in columns
 
-        @Member.expose
-        def testing_expose(title=None):
-            query = self.session.query(Member)
-            if title:
-                return query.filter_by(title=title).one_or_none()
-            return query
-
-        # Query output
-        result = testing_expose()
-        self.assertEqual(result[0]["title"], self.member_dict_sample["title"])
-
-        # One object output
-        result = testing_expose(title=self.member_dict_sample["title"])
-        self.assertEqual(result["title"], self.member_dict_sample["title"])
-
-        # None
-        result = testing_expose(title="What?")
-        self.assertEqual(result, None)
-
-        # Boolean value
-        member.update_from_dict(dict(visible=True))
-        self.assertEqual(member.visible, True)
-
-        member.update_from_dict(dict(visible=False))
-        self.assertEqual(member.visible, False)
-
-        member.update_from_dict(dict(visible=None))
-        self.assertEqual(member.visible, None)
-
-    def test_get_column(self):
-        title_column = Member.get_column("title")
-        self.assertIsInstance(title_column, Field)
-
-    def test_relationship(self):
-        assigner = Member()
-        assigner.update_from_dict(self.member_dict_sample)
-        assigner.email = "test2@example.com"
-
-        member = Member()
-        member.keywords.append("keyword_one")
-        member.assigner = assigner
-        member.update_from_dict(self.member_dict_sample)
-        self.session.add(member)
-        self.session.commit()
-        result_dict = member.to_dict()
-        self.assertEqual(len(result_dict["KeywordsNotProtected"]), 1)
-
-        self.session.query(Member).delete()
-        self.session.commit()
-
-    def test_iter_columns(self):
-        columns = {
-            c.key: c
-            for c in Member.iter_columns(
-                relationships=False, synonyms=False, composites=False
-            )
-        }
-        self.assertEqual(len(columns), 20)
-        self.assertNotIn("name", columns)
-        self.assertNotIn("password", columns)
-        self.assertIn("_password", columns)
-
-        columns = {
-            c.key: c
-            for c in Member.iter_columns(
-                relationships=False,
-                synonyms=False,
-                composites=False,
-                use_inspection=False,
-            )
-        }
-        self.assertEqual(len(columns), 19)
-        self.assertNotIn("is_visible", columns)
-        self.assertNotIn("_password", columns)
-        self.assertIn("password", columns)
-
-    def test_iter_dict_columns(self):
-        columns = {
-            c.key: c
-            for c in Member.iter_dict_columns(
-                include_readonly_columns=False, include_protected_columns=False
-            )
-        }
-        self.assertEqual(len(columns), 19)
-        self.assertNotIn("name", columns)
-        self.assertNotIn("password", columns)
-        self.assertNotIn("_password", columns)
-        self.assertNotIn("_avatar", columns)
-        self.assertNotIn("coverImage", columns)
-        self.assertIn("avatar", columns)
-
-    def test_datetime_format(self):
-        member = Member()
-        member_dict = dict(self.member_dict_sample)
-        member_dict.update({"lastLoginTime": "2017-10-10T10:10:00."})
-        member.update_from_dict(member_dict)
-
-        member = Member()
-        member_dict = dict(self.member_dict_sample)
-        member_dict.update({"lastLoginTime": "2017-10-10T10:10:00"})
-        member.update_from_dict(member_dict)
-
-        # Invalid month value
-        with self.assertRaises(ValueError):
-            member = Member()
-            member_dict = dict(self.member_dict_sample)
-            member_dict.update({"lastLoginTime": "2017-13-10T10:10:00"})
-            member.update_from_dict(member_dict)
-
-        # Invalid datetime format
-        with self.assertRaises(ValueError):
-            member = Member()
-            member_dict = dict(self.member_dict_sample)
-            member_dict.update({"lastLoginTime": "InvalidDatetime"})
-            member.update_from_dict(member_dict)
-
-        # datetime might not have ending Z
-        member = Member()
-        member_dict = dict(self.member_dict_sample)
-        member_dict.update({"lastLoginTime": "2017-10-10T10:10:00.4546"})
-        member.update_from_dict(member_dict)
-        member_result_dict = member.to_dict()
-        self.assertEqual(
-            member_result_dict["lastLoginTime"],
-            "2017-10-10T10:10:00.004546+00:00",
+    columns = {
+        c.key: c
+        for c in Member.iter_columns(
+            relationships=False,
+            synonyms=False,
+            composites=False,
+            use_inspection=False,
         )
+    }
+    assert len(columns) == 19
+    assert "is_visible" not in columns
+    assert "_password" not in columns
+    assert "password" in columns
 
-        # datetime containing ending Z
-        member = Member()
-        member_dict = dict(self.member_dict_sample)
-        member_dict.update({"lastLoginTime": "2017-10-10T10:10:00.4546Z"})
-        member.update_from_dict(member_dict)
-        member_result_dict = member.to_dict()
-        self.assertEqual(
-            member_result_dict["lastLoginTime"],
-            "2017-10-10T10:10:00.004546+00:00",
+
+def test_iter_dict_columns():
+    columns = {
+        c.key: c
+        for c in Member.iter_dict_columns(
+            include_readonly_columns=False, include_protected_columns=False
         )
+    }
+    assert len(columns) == 19
+    assert "name" not in columns
+    assert "password" not in columns
+    assert "_password" not in columns
+    assert "_avatar" not in columns
+    assert "coverImage" not in columns
+    assert "avatar" in columns
 
-        # datetime with timezone
+
+def test_datetime_format():
+    member = Member()
+    member_dict = dict(member_dict_sample)
+    member_dict.update({"lastLoginTime": "2017-10-10T10:10:00."})
+    member.update_from_dict(member_dict)
+
+    member = Member()
+    member_dict = dict(member_dict_sample)
+    member_dict.update({"lastLoginTime": "2017-10-10T10:10:00"})
+    member.update_from_dict(member_dict)
+
+    # Invalid month value
+    with pytest.raises(ValueError):
         member = Member()
-        member_dict = dict(self.member_dict_sample)
-        member_dict.update({"lastLoginTime": "2017-10-10T10:10:00.4546+03:00"})
+        member_dict = dict(member_dict_sample)
+        member_dict.update({"lastLoginTime": "2017-13-10T10:10:00"})
         member.update_from_dict(member_dict)
-        member_result_dict = member.to_dict()
-        self.assertEqual(
-            member_result_dict["lastLoginTime"],
-            "2017-10-10T10:10:00.004546+03:00",
-        )
 
-        # datetime without microsecond
+    # Invalid datetime format
+    with pytest.raises(ValueError):
         member = Member()
-        member_dict = dict(self.member_dict_sample)
-        member_dict.update({"lastLoginTime": "2017-10-10T10:10:00+03:00"})
+        member_dict = dict(member_dict_sample)
+        member_dict.update({"lastLoginTime": "InvalidDatetime"})
         member.update_from_dict(member_dict)
-        member_result_dict = member.to_dict()
-        self.assertEqual(
-            member_result_dict["lastLoginTime"], "2017-10-10T10:10:00+03:00"
-        )
 
-    def test_date_format(self):
-        # iso date format
+    # datetime might not have ending Z
+    member = Member()
+    member_dict = dict(member_dict_sample)
+    member_dict.update({"lastLoginTime": "2017-10-10T10:10:00.4546"})
+    member.update_from_dict(member_dict)
+    member_result_dict = member.to_dict()
+    assert (
+        member_result_dict["lastLoginTime"]
+        == "2017-10-10T10:10:00.004546+00:00"
+    )
+
+    # datetime containing ending Z
+    member = Member()
+    member_dict = dict(member_dict_sample)
+    member_dict.update({"lastLoginTime": "2017-10-10T10:10:00.4546Z"})
+    member.update_from_dict(member_dict)
+    member_result_dict = member.to_dict()
+    assert (
+        member_result_dict["lastLoginTime"]
+        == "2017-10-10T10:10:00.004546+00:00"
+    )
+
+    # datetime with timezone
+    member = Member()
+    member_dict = dict(member_dict_sample)
+    member_dict.update({"lastLoginTime": "2017-10-10T10:10:00.4546+03:00"})
+    member.update_from_dict(member_dict)
+    member_result_dict = member.to_dict()
+    assert (
+        member_result_dict["lastLoginTime"]
+        == "2017-10-10T10:10:00.004546+03:00"
+    )
+
+    # datetime without microsecond
+    member = Member()
+    member_dict = dict(member_dict_sample)
+    member_dict.update({"lastLoginTime": "2017-10-10T10:10:00+03:00"})
+    member.update_from_dict(member_dict)
+    member_result_dict = member.to_dict()
+    assert member_result_dict["lastLoginTime"] == "2017-10-10T10:10:00+03:00"
+
+
+def test_date_format():
+    # iso date format
+    member = Member()
+    member_dict = dict(member_dict_sample)
+    member_dict.update({"birth": "2001-01-01"})
+    member.update_from_dict(member_dict)
+    member_result_dict = member.to_dict()
+    assert member_result_dict["birth"] == "2001-01-01"
+
+    # none iso date format
+    with pytest.raises(ValueError):
         member = Member()
-        member_dict = dict(self.member_dict_sample)
-        member_dict.update({"birth": "2001-01-01"})
+        member_dict = dict(member_dict_sample)
+        member_dict.update({"birth": "01-01-01"})
         member.update_from_dict(member_dict)
-        member_result_dict = member.to_dict()
-        self.assertEqual(member_result_dict["birth"], "2001-01-01")
 
-        # none iso date format
-        with self.assertRaises(ValueError):
-            member = Member()
-            member_dict = dict(self.member_dict_sample)
-            member_dict.update({"birth": "01-01-01"})
-            member.update_from_dict(member_dict)
-
-        # none iso date format
-        with self.assertRaises(ValueError):
-            member = Member()
-            member_dict = dict(self.member_dict_sample)
-            member_dict.update({"birth": "2001/01/01"})
-            member.update_from_dict(member_dict)
-
-    def test_time_format(self):
-        # iso time format
+    # none iso date format
+    with pytest.raises(ValueError):
         member = Member()
-        member_dict = dict(self.member_dict_sample)
-        member_dict.update({"breakfastTime": "08:08:08"})
+        member_dict = dict(member_dict_sample)
+        member_dict.update({"birth": "2001/01/01"})
         member.update_from_dict(member_dict)
-        member_result_dict = member.to_dict()
-        self.assertEqual(member_result_dict["breakfastTime"], "08:08:08")
-
-        # none iso time format
-        with self.assertRaises(ValueError):
-            member = Member()
-            member_dict = dict(self.member_dict_sample)
-            member_dict.update({"breakfastTime": "08-08-08"})
-            member.update_from_dict(member_dict)
 
 
-if __name__ == "__main__":  # pragma: no cover
-    unittest.main()
+def test_time_format():
+    # iso time format
+    member = Member()
+    member_dict = dict(member_dict_sample)
+    member_dict.update({"breakfastTime": "08:08:08"})
+    member.update_from_dict(member_dict)
+    member_result_dict = member.to_dict()
+    assert member_result_dict["breakfastTime"] == "08:08:08"
+
+    # none iso time format
+    with pytest.raises(ValueError):
+        member = Member()
+        member_dict = dict(member_dict_sample)
+        member_dict.update({"breakfastTime": "08-08-08"})
+        member.update_from_dict(member_dict)

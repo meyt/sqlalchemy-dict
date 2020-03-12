@@ -12,11 +12,12 @@ python:
 before_install:
   - pip install -U pip setuptools wheel
   - pip install -r requirements-dev.txt
+  - pip install --upgrade pytest
 
 install: pip install -e .
 
 script:
-  - coverage run --source sqlalchemy_dict $(which nosetests)
+  - py.test -vv --cov-report term-missing:skip-covered --cov=sqlalchemy_dict
 
 after_success: if [[ $TRAVIS_PYTHON_VERSION == '3.5' ]]; then
   pip install -r requirements-doc.txt &&
