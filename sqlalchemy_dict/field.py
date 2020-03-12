@@ -1,9 +1,8 @@
-
 from sqlalchemy import Column
 from sqlalchemy.orm import (
     relationship as sa_relationship,
     composite as sa_composite,
-    synonym as sa_synonym
+    synonym as sa_synonym,
 )
 
 
@@ -13,8 +12,15 @@ class Field(Column):
     An overridden class from ``sqlalchemy.Column`` to apply ``sqlalchemy_dict`` properties.
     """
 
-    def __init__(self, *args, dict_key: str=None, readonly: bool=None,
-                 protected: bool=None, info: dict=None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        dict_key: str = None,
+        readonly: bool = None,
+        protected: bool = None,
+        info: dict = None,
+        **kwargs
+    ):
         """
         Initialize the field
 
@@ -31,18 +37,20 @@ class Field(Column):
         info = info or dict()
 
         if dict_key is not None:
-            info['dict_key'] = dict_key
+            info["dict_key"] = dict_key
 
         if readonly is not None:
-            info['readonly'] = readonly
+            info["readonly"] = readonly
 
         if protected is not None:
-            info['protected'] = protected
+            info["protected"] = protected
 
         super(Field, self).__init__(*args, info=info, **kwargs)
 
 
-def relationship(*args, dict_key: str=None, protected: bool=None, **kwargs):
+def relationship(
+    *args, dict_key: str = None, protected: bool = None, **kwargs
+):
     """
     Same as ``sqlalchemy.orm.relationship`` with extra arguments to use in ``sqlalchemy_dict``.
 
@@ -57,15 +65,21 @@ def relationship(*args, dict_key: str=None, protected: bool=None, **kwargs):
     info = dict()
 
     if dict_key is not None:
-        info['dict_key'] = dict_key
+        info["dict_key"] = dict_key
 
     if protected is not None:
-        info['protected'] = protected
+        info["protected"] = protected
 
     return sa_relationship(*args, info=info, **kwargs)
 
 
-def composite(*args, dict_key: str=None, protected: bool=None, readonly: bool=None, **kwargs):
+def composite(
+    *args,
+    dict_key: str = None,
+    protected: bool = None,
+    readonly: bool = None,
+    **kwargs
+):
     """
     Same as ``sqlalchemy.orm.composite`` with extra arguments to use in ``sqlalchemy_dict``.
 
@@ -82,18 +96,24 @@ def composite(*args, dict_key: str=None, protected: bool=None, readonly: bool=No
     info = dict()
 
     if dict_key is not None:
-        info['dict_key'] = dict_key
+        info["dict_key"] = dict_key
 
     if protected is not None:
-        info['protected'] = protected
+        info["protected"] = protected
 
     if readonly is not None:
-        info['readonly'] = readonly
+        info["readonly"] = readonly
 
     return sa_composite(*args, info=info, **kwargs)
 
 
-def synonym(*args, dict_key: str=None, protected: bool=None, readonly: bool=None, **kwargs):
+def synonym(
+    *args,
+    dict_key: str = None,
+    protected: bool = None,
+    readonly: bool = None,
+    **kwargs
+):
     """
     Same as ``sqlalchemy.orm.synonym`` with extra arguments to use in ``sqlalchemy_dict``.
 
@@ -112,12 +132,12 @@ def synonym(*args, dict_key: str=None, protected: bool=None, readonly: bool=None
     info = dict()
 
     if dict_key is not None:
-        info['dict_key'] = dict_key
+        info["dict_key"] = dict_key
 
     if protected is not None:
-        info['protected'] = protected
+        info["protected"] = protected
 
     if readonly is not None:
-        info['readonly'] = readonly
+        info["readonly"] = readonly
 
     return sa_synonym(*args, info=info, **kwargs)

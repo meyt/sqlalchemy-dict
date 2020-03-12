@@ -47,7 +47,9 @@ class BaseModel(object):
         :param column:
         :return:
         """
-        return cls.get_column_info(column).get('dict_key', cls.__formatter__.export_key(column.key))
+        return cls.get_column_info(column).get(
+            "dict_key", cls.__formatter__.export_key(column.key)
+        )
 
     @classmethod
     def get_column(cls, column: Union[Column, str]):
@@ -73,7 +75,7 @@ class BaseModel(object):
         :return:
         """
         # Use original property for proxies
-        if hasattr(column, 'original_property') and column.original_property:
+        if hasattr(column, "original_property") and column.original_property:
             info = column.info.copy()
             info.update(column.original_property.info)
         else:
@@ -96,7 +98,7 @@ class BaseModel(object):
                     return v
 
                 if c.type.python_type is bool and not isinstance(v, bool):
-                    return str(v).lower() == 'true'
+                    return str(v).lower() == "true"
 
                 if c.type.python_type == datetime:
                     return cls.__formatter__.import_datetime(v)
@@ -121,11 +123,16 @@ class BaseModel(object):
         :param v:
         :return: Returns tuple of column dictionary key and value
         """
-        if hasattr(column, 'property') and isinstance(column.property,
-                                                      RelationshipProperty) and column.property.uselist:
+        if (
+            hasattr(column, "property")
+            and isinstance(column.property, RelationshipProperty)
+            and column.property.uselist
+        ):
             result = [c.to_dict() for c in v]
 
-        elif hasattr(column, 'property') and isinstance(column.property, CompositeProperty):
+        elif hasattr(column, "property") and isinstance(
+            column.property, CompositeProperty
+        ):
             result = v.__composite_values__()
 
         elif v is None:
@@ -140,7 +147,7 @@ class BaseModel(object):
         elif isinstance(v, time):
             result = cls.__formatter__.export_time(v)
 
-        elif hasattr(v, 'to_dict'):
+        elif hasattr(v, "to_dict"):
             result = v.to_dict()
 
         elif isinstance(v, Decimal):
@@ -161,13 +168,19 @@ class BaseModel(object):
         for column, value in self.extract_data_from_dict(context):
             setattr(
                 self,
-                column.key[1:] if column.key.startswith('_') else column.key,
-                self.import_value(column, value)
+                column.key[1:] if column.key.startswith("_") else column.key,
+                self.import_value(column, value),
             )
 
     @classmethod
-    def iter_columns(cls, relationships=True, synonyms=True, composites=True,
-                     use_inspection=True, hybrids=True) -> Generator[Column, None, None]:
+    def iter_columns(
+        cls,
+        relationships=True,
+        synonyms=True,
+        composites=True,
+        use_inspection=True,
+        hybrids=True,
+    ) -> Generator[Column, None, None]:
         """
         Iterate model columns.
 
@@ -182,16 +195,18 @@ class BaseModel(object):
             mapper = inspect(cls)
             for k, c in mapper.all_orm_descriptors.items():
 
-                if k == '__mapper__':
+                if k == "__mapper__":
                     continue
 
                 if c.extension_type == ASSOCIATION_PROXY:
                     continue
 
-                if (not hybrids and c.extension_type == HYBRID_PROPERTY) \
-                        or (not relationships and k in mapper.relationships) \
-                        or (not synonyms and k in mapper.synonyms) \
-                        or (not composites and k in mapper.composites):
+                if (
+                    (not hybrids and c.extension_type == HYBRID_PROPERTY)
+                    or (not relationships and k in mapper.relationships)
+                    or (not synonyms and k in mapper.synonyms)
+                    or (not composites and k in mapper.composites)
+                ):
                     continue
                 yield getattr(cls, k)
 
@@ -201,8 +216,12 @@ class BaseModel(object):
                 yield c
 
     @classmethod
-    def iter_dict_columns(cls, include_readonly_columns=True,
-                          include_protected_columns=False, **kw) -> Generator[Column, None, None]:
+    def iter_dict_columns(
+        cls,
+        include_readonly_columns=True,
+        include_protected_columns=False,
+        **kw
+    ) -> Generator[Column, None, None]:
         """
         Same as :func:`BaseModel.iter_columns` but have options to include
         ``readonly`` and ``protected`` columns.
@@ -215,21 +234,26 @@ class BaseModel(object):
         for column in cls.iter_columns(**kw):
             info = cls.get_column_info(column)
 
-            if (not include_protected_columns and info.get('protected')) or \
-                    (not include_readonly_columns and info.get('readonly')):
+            if (not include_protected_columns and info.get("protected")) or (
+                not include_readonly_columns and info.get("readonly")
+            ):
                 continue
 
             yield column
 
     @classmethod
-    def extract_data_from_dict(cls, context: dict) -> Generator[Tuple[Column, Any], None, None]:
+    def extract_data_from_dict(
+        cls, context: dict
+    ) -> Generator[Tuple[Column, Any], None, None]:
         """
         Extract values from dictionary.
 
         :param context:
         :return: Tuple of diction
         """
-        for c in cls.iter_dict_columns(include_protected_columns=True, include_readonly_columns=False):
+        for c in cls.iter_dict_columns(
+            include_protected_columns=True, include_readonly_columns=False
+        ):
             param_name = cls.get_dict_key(c)
 
             if param_name in context:
@@ -245,7 +269,9 @@ class BaseModel(object):
         """
         result = {}
         for c in self.iter_dict_columns():
-            result.setdefault(*self.prepare_for_export(c, getattr(self, c.key)))
+            result.setdefault(
+                *self.prepare_for_export(c, getattr(self, c.key))
+            )
         return result
 
     @classmethod
@@ -266,11 +292,12 @@ class BaseModel(object):
         :param func:
         :return:
         """
+
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             result = func(*args, **kwargs)
 
-            if hasattr(result, 'to_dict'):
+            if hasattr(result, "to_dict"):
                 return result.to_dict()
 
             if isinstance(result, Query):

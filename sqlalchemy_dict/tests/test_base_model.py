@@ -2,9 +2,18 @@ import json
 import unittest
 
 from sqlalchemy import (
-    UnicodeText, Unicode, DateTime, Date, Time,
-    Integer, Float, ForeignKey, Boolean,
-    create_engine, Enum, TypeDecorator
+    UnicodeText,
+    Unicode,
+    DateTime,
+    Date,
+    Time,
+    Integer,
+    Float,
+    ForeignKey,
+    Boolean,
+    create_engine,
+    Enum,
+    TypeDecorator,
 )
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.schema import MetaData
@@ -53,96 +62,111 @@ class FullName(object):  # pragma: no cover
         self.last_name = last_name
 
     def __composite_values__(self):
-        return '%s %s' % (self.first_name, self.last_name)
+        return "%s %s" % (self.first_name, self.last_name)
 
     def __repr__(self):
-        return 'FullName(%s %s)' % (self.first_name, self.last_name)
+        return "FullName(%s %s)" % (self.first_name, self.last_name)
 
     def __eq__(self, other):
-        return isinstance(other, FullName) and \
-               other.first_name == self.first_name and \
-               other.last_name == self.last_name
+        return (
+            isinstance(other, FullName)
+            and other.first_name == self.first_name
+            and other.last_name == self.last_name
+        )
 
     def __ne__(self, other):
         return not self.__eq__(other)
 
 
 class Keyword(DeclarativeBase):
-    __tablename__ = 'keyword'
+    __tablename__ = "keyword"
     id = Field(Integer, primary_key=True)
     keyword = Field(Unicode(64))
 
 
 class MemberKeywords(DeclarativeBase):
-    __tablename__ = 'member_keywords'
-    member_id = Field(Integer, ForeignKey('member.id'), primary_key=True)
-    keyword_id = Field(Integer, ForeignKey('keyword.id'), primary_key=True)
+    __tablename__ = "member_keywords"
+    member_id = Field(Integer, ForeignKey("member.id"), primary_key=True)
+    keyword_id = Field(Integer, ForeignKey("keyword.id"), primary_key=True)
 
 
 class Member(DeclarativeBase):
-    __tablename__ = 'member'
+    __tablename__ = "member"
 
     id = Field(Integer, primary_key=True)
     email = Field(Unicode(100), unique=True, index=True)
     title = Field(Unicode(50), index=True)
     first_name = Field(Unicode(50), index=True)
-    last_name = Field(Unicode(100), dict_key='lastName')
+    last_name = Field(Unicode(100), dict_key="lastName")
     is_active = Field(Boolean, nullable=True, readonly=True)
     phone = Field(Unicode(10), nullable=True)
-    name = composite(FullName, first_name, last_name, readonly=True, dict_key='fullName')
-    name_alternative = composite(FullName, first_name, last_name, protected=True)
-    _password = Field('password', Unicode(128), index=True, protected=True)
+    name = composite(
+        FullName, first_name, last_name, readonly=True, dict_key="fullName"
+    )
+    name_alternative = composite(
+        FullName, first_name, last_name, protected=True
+    )
+    _password = Field("password", Unicode(128), index=True, protected=True)
     birth = Field(Date)
     breakfast_time = Field(Time, nullable=True)
     weight = Field(Float(asdecimal=True), default=50)
-    _keywords = relationship('Keyword', secondary='member_keywords', dict_key='keywords', protected=True)
-    _keywords_not_protected = relationship('Keyword', secondary='member_keywords')
-    keywords = association_proxy('_keywords', 'keyword', creator=lambda k: Keyword(keyword=k))
+    _keywords = relationship(
+        "Keyword",
+        secondary="member_keywords",
+        dict_key="keywords",
+        protected=True,
+    )
+    _keywords_not_protected = relationship(
+        "Keyword", secondary="member_keywords"
+    )
+    keywords = association_proxy(
+        "_keywords", "keyword", creator=lambda k: Keyword(keyword=k)
+    )
     visible = Field(Boolean, nullable=True)
     last_login_time = Field(DateTime)
-    role = Field(Enum('admin', 'manager', 'normal', name='member_role_name'))
+    role = Field(Enum("admin", "manager", "normal", name="member_role_name"))
     meta = Field(JsonType)
-    assigner_id = Field(Integer, ForeignKey('member.id'), nullable=True)
-    assigner = relationship('Member', uselist=False)
-    my_type = Field(MyType, default='init')
-    _avatar = Field('avatar', Unicode(255), nullable=True, protected=True)
-    _cover = Field('cover', Unicode(255), nullable=True, protected=True)
+    assigner_id = Field(Integer, ForeignKey("member.id"), nullable=True)
+    assigner = relationship("Member", uselist=False)
+    my_type = Field(MyType, default="init")
+    _avatar = Field("avatar", Unicode(255), nullable=True, protected=True)
+    _cover = Field("cover", Unicode(255), nullable=True, protected=True)
 
     def _set_password(self, password):
-        self._password = 'hashed:%s' % password
+        self._password = "hashed:%s" % password
 
     def _get_password(self):  # pragma: no cover
         return self._password
 
     password = synonym(
-        '_password',
+        "_password",
         descriptor=property(_get_password, _set_password),
-        protected=True
+        protected=True,
     )
 
     def _set_avatar(self, avatar):  # pragma: no cover
-        self._avatar = 'avatar:%s' % avatar
+        self._avatar = "avatar:%s" % avatar
 
     def _get_avatar(self):  # pragma: no cover
         return self._avatar
 
     avatar = synonym(
-        '_avatar',
+        "_avatar",
         descriptor=property(_get_avatar, _set_avatar),
-        protected=False
+        protected=False,
     )
 
     def _set_cover(self, cover):  # pragma: no cover
-        self._cover = 'cover:%s' % cover
+        self._cover = "cover:%s" % cover
 
     def _get_cover(self):  # pragma: no cover
         return self._cover
 
     cover = synonym(
-        '_cover',
+        "_cover",
         descriptor=property(_get_cover, _set_cover),
-        dict_key='coverImage',
-        readonly=True
+        dict_key="coverImage",
+        readonly=True,
     )
 
     @hybrid_property
@@ -161,26 +185,23 @@ class Member(DeclarativeBase):
 
 class BaseModelTestCase(unittest.TestCase):
     member_dict_sample = {
-        'title': 'test',
-        'firstName': 'test',
-        'lastName': 'test',
-        'email': 'test@example.com',
-        'password': '123456',
-        'birth': '2001-01-01',
-        'weight': 1.1,
-        'visible': 'false',
-        'isVisible': False,
-        'lastLoginTime': '2017-10-10T10:10:00.12313',
-        'role': 'admin',
-        'myType': 'test',
-        'meta': {
-            'score': 5,
-            'language': 'english'
-        }
+        "title": "test",
+        "firstName": "test",
+        "lastName": "test",
+        "email": "test@example.com",
+        "password": "123456",
+        "birth": "2001-01-01",
+        "weight": 1.1,
+        "visible": "false",
+        "isVisible": False,
+        "lastLoginTime": "2017-10-10T10:10:00.12313",
+        "role": "admin",
+        "myType": "test",
+        "meta": {"score": 5, "language": "english"},
     }
 
     def setUp(self):
-        self.engine = create_engine('sqlite:///:memory:')
+        self.engine = create_engine("sqlite:///:memory:")
         self.session = Session(self.engine)
         DeclarativeBase.metadata.create_all(self.engine)
 
@@ -191,11 +212,13 @@ class BaseModelTestCase(unittest.TestCase):
         member = Member()
         member.update_from_dict(self.member_dict_sample)
 
-        self.assertEqual(member.title, self.member_dict_sample['title'])
-        self.assertEqual(member.password, 'hashed:%s' % self.member_dict_sample['password'])
+        self.assertEqual(member.title, self.member_dict_sample["title"])
+        self.assertEqual(
+            member.password, "hashed:%s" % self.member_dict_sample["password"]
+        )
         self.assertEqual(member.visible, False)
         self.assertEqual(member.weight, 1.1)
-        self.assertEqual(member.meta, self.member_dict_sample['meta'])
+        self.assertEqual(member.meta, self.member_dict_sample["meta"])
         self.session.add(member)
 
         @Member.expose
@@ -207,205 +230,197 @@ class BaseModelTestCase(unittest.TestCase):
 
         # Query output
         result = testing_expose()
-        self.assertEqual(result[0]['title'], self.member_dict_sample['title'])
+        self.assertEqual(result[0]["title"], self.member_dict_sample["title"])
 
         # One object output
-        result = testing_expose(title=self.member_dict_sample['title'])
-        self.assertEqual(result['title'], self.member_dict_sample['title'])
+        result = testing_expose(title=self.member_dict_sample["title"])
+        self.assertEqual(result["title"], self.member_dict_sample["title"])
 
         # None
-        result = testing_expose(title='What?')
+        result = testing_expose(title="What?")
         self.assertEqual(result, None)
 
         # Boolean value
-        member.update_from_dict(dict(
-            visible=True
-        ))
+        member.update_from_dict(dict(visible=True))
         self.assertEqual(member.visible, True)
 
-        member.update_from_dict(dict(
-            visible=False
-        ))
+        member.update_from_dict(dict(visible=False))
         self.assertEqual(member.visible, False)
 
-        member.update_from_dict(dict(
-            visible=None
-        ))
+        member.update_from_dict(dict(visible=None))
         self.assertEqual(member.visible, None)
 
     def test_get_column(self):
-        title_column = Member.get_column('title')
+        title_column = Member.get_column("title")
         self.assertIsInstance(title_column, Field)
 
     def test_relationship(self):
         assigner = Member()
         assigner.update_from_dict(self.member_dict_sample)
-        assigner.email = 'test2@example.com'
+        assigner.email = "test2@example.com"
 
         member = Member()
-        member.keywords.append('keyword_one')
+        member.keywords.append("keyword_one")
         member.assigner = assigner
         member.update_from_dict(self.member_dict_sample)
         self.session.add(member)
         self.session.commit()
         result_dict = member.to_dict()
-        self.assertEqual(len(result_dict['KeywordsNotProtected']), 1)
+        self.assertEqual(len(result_dict["KeywordsNotProtected"]), 1)
 
         self.session.query(Member).delete()
         self.session.commit()
 
     def test_iter_columns(self):
-        columns = {c.key: c for c in Member.iter_columns(relationships=False, synonyms=False, composites=False)}
+        columns = {
+            c.key: c
+            for c in Member.iter_columns(
+                relationships=False, synonyms=False, composites=False
+            )
+        }
         self.assertEqual(len(columns), 20)
-        self.assertNotIn('name', columns)
-        self.assertNotIn('password', columns)
-        self.assertIn('_password', columns)
+        self.assertNotIn("name", columns)
+        self.assertNotIn("password", columns)
+        self.assertIn("_password", columns)
 
-        columns = {c.key: c for c in Member.iter_columns(
-            relationships=False,
-            synonyms=False,
-            composites=False,
-            use_inspection=False
-        )}
+        columns = {
+            c.key: c
+            for c in Member.iter_columns(
+                relationships=False,
+                synonyms=False,
+                composites=False,
+                use_inspection=False,
+            )
+        }
         self.assertEqual(len(columns), 19)
-        self.assertNotIn('is_visible', columns)
-        self.assertNotIn('_password', columns)
-        self.assertIn('password', columns)
+        self.assertNotIn("is_visible", columns)
+        self.assertNotIn("_password", columns)
+        self.assertIn("password", columns)
 
     def test_iter_dict_columns(self):
-        columns = {c.key: c for c in Member.iter_dict_columns(
-            include_readonly_columns=False, include_protected_columns=False)}
+        columns = {
+            c.key: c
+            for c in Member.iter_dict_columns(
+                include_readonly_columns=False, include_protected_columns=False
+            )
+        }
         self.assertEqual(len(columns), 19)
-        self.assertNotIn('name', columns)
-        self.assertNotIn('password', columns)
-        self.assertNotIn('_password', columns)
-        self.assertNotIn('_avatar', columns)
-        self.assertNotIn('coverImage', columns)
-        self.assertIn('avatar', columns)
+        self.assertNotIn("name", columns)
+        self.assertNotIn("password", columns)
+        self.assertNotIn("_password", columns)
+        self.assertNotIn("_avatar", columns)
+        self.assertNotIn("coverImage", columns)
+        self.assertIn("avatar", columns)
 
     def test_datetime_format(self):
         member = Member()
         member_dict = dict(self.member_dict_sample)
-        member_dict.update({
-            'lastLoginTime': '2017-10-10T10:10:00.'
-        })
+        member_dict.update({"lastLoginTime": "2017-10-10T10:10:00."})
         member.update_from_dict(member_dict)
 
         member = Member()
         member_dict = dict(self.member_dict_sample)
-        member_dict.update({
-            'lastLoginTime': '2017-10-10T10:10:00'
-        })
+        member_dict.update({"lastLoginTime": "2017-10-10T10:10:00"})
         member.update_from_dict(member_dict)
 
         # Invalid month value
         with self.assertRaises(ValueError):
             member = Member()
             member_dict = dict(self.member_dict_sample)
-            member_dict.update({
-                'lastLoginTime': '2017-13-10T10:10:00'
-            })
+            member_dict.update({"lastLoginTime": "2017-13-10T10:10:00"})
             member.update_from_dict(member_dict)
 
         # Invalid datetime format
         with self.assertRaises(ValueError):
             member = Member()
             member_dict = dict(self.member_dict_sample)
-            member_dict.update({
-                'lastLoginTime': 'InvalidDatetime'
-            })
+            member_dict.update({"lastLoginTime": "InvalidDatetime"})
             member.update_from_dict(member_dict)
 
         # datetime might not have ending Z
         member = Member()
         member_dict = dict(self.member_dict_sample)
-        member_dict.update({
-            'lastLoginTime': '2017-10-10T10:10:00.4546'
-        })
+        member_dict.update({"lastLoginTime": "2017-10-10T10:10:00.4546"})
         member.update_from_dict(member_dict)
         member_result_dict = member.to_dict()
-        self.assertEqual(member_result_dict['lastLoginTime'], '2017-10-10T10:10:00.004546+00:00')
+        self.assertEqual(
+            member_result_dict["lastLoginTime"],
+            "2017-10-10T10:10:00.004546+00:00",
+        )
 
         # datetime containing ending Z
         member = Member()
         member_dict = dict(self.member_dict_sample)
-        member_dict.update({
-            'lastLoginTime': '2017-10-10T10:10:00.4546Z'
-        })
+        member_dict.update({"lastLoginTime": "2017-10-10T10:10:00.4546Z"})
         member.update_from_dict(member_dict)
         member_result_dict = member.to_dict()
-        self.assertEqual(member_result_dict['lastLoginTime'], '2017-10-10T10:10:00.004546+00:00')
+        self.assertEqual(
+            member_result_dict["lastLoginTime"],
+            "2017-10-10T10:10:00.004546+00:00",
+        )
 
         # datetime with timezone
         member = Member()
         member_dict = dict(self.member_dict_sample)
-        member_dict.update({
-            'lastLoginTime': '2017-10-10T10:10:00.4546+03:00'
-        })
+        member_dict.update({"lastLoginTime": "2017-10-10T10:10:00.4546+03:00"})
         member.update_from_dict(member_dict)
         member_result_dict = member.to_dict()
-        self.assertEqual(member_result_dict['lastLoginTime'], '2017-10-10T10:10:00.004546+03:00')
+        self.assertEqual(
+            member_result_dict["lastLoginTime"],
+            "2017-10-10T10:10:00.004546+03:00",
+        )
 
         # datetime without microsecond
         member = Member()
         member_dict = dict(self.member_dict_sample)
-        member_dict.update({
-            'lastLoginTime': '2017-10-10T10:10:00+03:00'
-        })
+        member_dict.update({"lastLoginTime": "2017-10-10T10:10:00+03:00"})
         member.update_from_dict(member_dict)
         member_result_dict = member.to_dict()
-        self.assertEqual(member_result_dict['lastLoginTime'], '2017-10-10T10:10:00+03:00')
-
+        self.assertEqual(
+            member_result_dict["lastLoginTime"], "2017-10-10T10:10:00+03:00"
+        )
 
     def test_date_format(self):
         # iso date format
         member = Member()
         member_dict = dict(self.member_dict_sample)
-        member_dict.update({
-            'birth': '2001-01-01'
-        })
+        member_dict.update({"birth": "2001-01-01"})
         member.update_from_dict(member_dict)
         member_result_dict = member.to_dict()
-        self.assertEqual(member_result_dict['birth'], '2001-01-01')
+        self.assertEqual(member_result_dict["birth"], "2001-01-01")
 
         # none iso date format
         with self.assertRaises(ValueError):
             member = Member()
             member_dict = dict(self.member_dict_sample)
-            member_dict.update({
-                'birth': '01-01-01'
-            })
+            member_dict.update({"birth": "01-01-01"})
             member.update_from_dict(member_dict)
 
         # none iso date format
         with self.assertRaises(ValueError):
             member = Member()
             member_dict = dict(self.member_dict_sample)
-            member_dict.update({
-                'birth': '2001/01/01'
-            })
+            member_dict.update({"birth": "2001/01/01"})
             member.update_from_dict(member_dict)
 
     def test_time_format(self):
         # iso time format
         member = Member()
         member_dict = dict(self.member_dict_sample)
-        member_dict.update({
-            'breakfastTime': '08:08:08',
-        })
+        member_dict.update(
+            {"breakfastTime": "08:08:08",}
+        )
         member.update_from_dict(member_dict)
         member_result_dict = member.to_dict()
-        self.assertEqual(member_result_dict['breakfastTime'], '08:08:08')
+        self.assertEqual(member_result_dict["breakfastTime"], "08:08:08")
 
         # none iso time format
         with self.assertRaises(ValueError):
             member = Member()
             member_dict = dict(self.member_dict_sample)
-            member_dict.update({
-                'breakfastTime': '08-08-08'
-            })
+            member_dict.update({"breakfastTime": "08-08-08"})
             member.update_from_dict(member_dict)
 
 
-if __name__ == '__main__':  # pragma: no cover
+if __name__ == "__main__":  # pragma: no cover
     unittest.main()
