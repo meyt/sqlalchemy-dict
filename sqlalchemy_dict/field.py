@@ -6,7 +6,6 @@ from sqlalchemy.orm import (
 )
 
 
-# noinspection PyAbstractClass
 class Field(Column):
     """
     An overridden class from ``sqlalchemy.Column`` to apply ``sqlalchemy_dict`` properties.

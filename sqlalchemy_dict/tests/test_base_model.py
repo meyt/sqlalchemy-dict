@@ -27,7 +27,6 @@ metadata = MetaData()
 DeclarativeBase = declarative_base(cls=BaseModel, metadata=metadata)
 
 
-# noinspection PyAbstractClass
 class JsonType(TypeDecorator):  # pragma: no cover
     impl = UnicodeText
 
@@ -45,7 +44,6 @@ class JsonType(TypeDecorator):  # pragma: no cover
         return dict
 
 
-# noinspection PyAbstractClass
 class MyType(TypeDecorator):
     impl = Unicode
 
@@ -177,7 +175,6 @@ class Member(DeclarativeBase):
     def is_visible(self, value):
         self.visible = value
 
-    # noinspection PyUnresolvedReferences
     @is_visible.expression
     def is_visible(self):
         return self.visible.is_(True)

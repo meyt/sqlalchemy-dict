@@ -211,7 +211,6 @@ class BaseModel(object):
                 yield getattr(cls, k)
 
         else:
-            # noinspection PyUnresolvedReferences
             for c in cls.__table__.c:
                 yield c
 
